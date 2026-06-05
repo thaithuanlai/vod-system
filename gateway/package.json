@@ -1,0 +1,31 @@
+{
+  "name": "vod-api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway cho hệ thống VOD Microservices",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint src/"
+  },
+  "keywords": [
+    "gateway",
+    "microservices",
+    "vod"
+  ],
+  "author": "VOD Team",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "http-proxy-middleware": "^4.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
