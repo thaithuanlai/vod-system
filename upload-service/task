@@ -1,0 +1,16 @@
+T15	Phase 1 – Development	Upload Service: Khởi tạo & cấu hình multer	Tạo Express app trong upload-service/, cài multer cho file upload, giới hạn file size 500MB, chỉ chấp nhận video formats: mp4, avi, mov, mkv. Cấu hình multer dùng memory storage.	Service nhận được file video từ client	- POST /upload nhận được file
+- File > 500MB → 413 Payload Too Large
+- File không phải video → 400 Bad Request
+- Không lưu file trực tiếp lên disk server
+T16	Phase 1 – Development	Upload Service: Upload video lên Google Cloud Storage	Implement logic upload file từ multer buffer lên GCS bucket vào folder /raw-videos/, đặt tên file theo UUID để tránh trùng, lưu original filename trong metadata.	File video được lưu vào GCS thành công	- Upload file → file xuất hiện trong GCS bucket
+- Filename là UUID (không phải tên gốc)
+- Metadata có originalName, size, mimeType
+- GCS URL được trả về trong response
+T17	Phase 1 – Development	Upload Service: Publish message lên RabbitMQ	Sau khi upload GCS thành công, publish message vào queue 'video-processing' với payload: {videoId, gcsPath, originalName, userId, uploadedAt}. Dùng amqplib package.	Processing Service nhận được job xử lý video	- Message được publish sau upload thành công
+- Message có đủ fields cần thiết
+- Nếu RabbitMQ down → log error, không crash service
+- Dùng persistent delivery mode
+T18	Phase 1 – Development	Upload Service: Tạo video metadata ban đầu	Sau khi upload, gọi Video Service để tạo document metadata ban đầu: {videoId, userId, title (từ filename), status: 'UPLOADING', gcsPath, createdAt}.	Video metadata được khởi tạo ngay khi upload	- Firestore có document video mới sau upload
+- Status ban đầu là 'UPLOADING'
+- VideoId được sync giữa Upload và Video Service
+- Response trả videoId cho client.
