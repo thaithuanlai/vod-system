@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Temporary files and folders
+tmp/
+temp/
+*.log
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (chứa key mật của GCS và RabbitMQ)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# GCP Credentials
+credentials.json
