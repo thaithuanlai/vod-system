@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: vod-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: vod_users
+      POSTGRES_USER: vod_admin
+      POSTGRES_PASSWORD: Vod2024Secure
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
