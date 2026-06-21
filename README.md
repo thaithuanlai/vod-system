@@ -103,7 +103,7 @@ npm run dev
 
 - [x] Task 1: PostgreSQL Database Setup (Docker)
 - [x] Task 2: Database Schema & Migration
-- [ ] Task 3: API Đăng ký (/register)
+- [x] Task 3: API Đăng ký (/register)
 - [ ] Task 4: API Đăng nhập & JWT (/login)
 - [ ] Task 5: React App Setup (Vite)
 - [ ] Task 6: Trang Register & Login
@@ -125,4 +125,14 @@ npm run dev
   - `created_at` TIMESTAMP
   - `updated_at` TIMESTAMP
 - Index trên cột `email`
-- Seed data: 1 user test (`test@vod.com`)
+- Seed data: 1 user test (`test@vod.com`)git add README.md
+
+### Task 3: API Đăng ký (/register)
+- Endpoint: `POST /api/auth/register`
+- Validate email format, password tối thiểu 8 ký tự
+- Hash password bằng bcrypt salt rounds=12
+- Trả về user object không có password
+- Status codes:
+  - `201 Created` — Đăng ký thành công
+  - `409 Conflict` — Email đã tồn tại
+  - `400 Bad Request` — Dữ liệu không hợp lệ
