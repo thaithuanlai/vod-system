@@ -91,4 +91,77 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// ==========================================
+// POST /api/auth/login — Đăng nhập
+// ==========================================
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Bước 1: Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Email và password là bắt buộc'
+      });
+    }
+
+    // Bước 2: Tìm user theo email
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+
+    // Bước 3: Không tìm thấy user → 401
+    // Không reveal email có tồn tại hay không
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Email hoặc password không đúng'
+      });
+    }
+
+    const user = result.rows[0];
+
+    // Bước 4: So sánh password với hash
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Email hoặc password không đúng'
+      });
+    }
+
+    // Bước 5: Sinh JWT token
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email
+      },
+      process.env.JWT_SECRET || 'vod_super_secret_key_2024',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    // Bước 6: Trả về token
+    return res.status(200).json({
+      message: 'Đăng nhập thành công',
+      accessToken: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Lỗi login:', error.message);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Đã có lỗi xảy ra'
+    });
+  }
+});
+
 module.exports = router;
