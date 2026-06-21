@@ -104,7 +104,7 @@ npm run dev
 - [x] Task 1: PostgreSQL Database Setup (Docker)
 - [x] Task 2: Database Schema & Migration
 - [x] Task 3: API Đăng ký (/register)
-- [ ] Task 4: API Đăng nhập & JWT (/login)
+- [x] Task 4: API Đăng nhập & JWT (/login)
 - [ ] Task 5: React App Setup (Vite)
 - [ ] Task 6: Trang Register & Login
 - [ ] Task 7: Dockerfile & Docker Compose
@@ -136,3 +136,12 @@ npm run dev
   - `201 Created` — Đăng ký thành công
   - `409 Conflict` — Email đã tồn tại
   - `400 Bad Request` — Dữ liệu không hợp lệ
+
+  ### Task 4: API Đăng nhập & JWT (/login)
+- Endpoint: `POST /api/auth/login`
+- Kiểm tra email tồn tại, so sánh bcrypt hash
+- Sinh JWT token (payload: userId, email, exp: 24h)
+- Không tiết lộ email có tồn tại hay không
+- Status codes:
+  - `200 OK` — Đăng nhập thành công + accessToken
+  - `401 Unauthorized` — Sai credentials
