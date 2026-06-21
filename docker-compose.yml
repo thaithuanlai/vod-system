@@ -14,5 +14,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  user-service:
+    image: node:18-alpine
+    container_name: vod-user-service
+    working_dir: /app
+    volumes:
+      - ./services/user-service:/app
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: vod_users
+      DB_USER: vod_admin
+      DB_PASSWORD: Vod2024Secure
+    depends_on:
+      - postgres
+    command: sh -c "npm install && node src/index.js"
+
 volumes:
   postgres_data:
