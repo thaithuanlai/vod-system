@@ -1,69 +1,67 @@
-
-=======
 # Hệ thống Lưu trữ và Phân phối Nội dung Video (VOD)
 Kiến trúc Microservices + Google Cloud Platform
 
 ## Công nghệ sử dụng
 - Backend: Node.js + Express
-- Database: PostgreSQL 15
+- Database: PostgreSQL 15 (Docker local)
 - Frontend: React + Vite + TailwindCSS
 - Container: Docker + Docker Compose
 - Cloud: Google Cloud Platform
 
 ## Cấu trúc thư mục
-vod-system/ 
+vod-system/
 
-├── .env 
+├── .env
 
-├── .gitignore 
+├── .gitignore
 
-├── docker-compose.yml 
+├── docker-compose.yml
 
-├── README.md 
+├── README.md
 
-├── infra/ 
+├── infra/
 
-│ ├── setup-gcp.sh 
+│   ├── setup-gcp.sh
 
-│ └── start-proxy.sh 
+│   └── start-proxy.sh
 
-├── services/ 
+├── services/
 
-│ └── user-service/ 
+│   └── user-service/
 
-│ ├── src/ 
+│       ├── src/
 
-│ │ ├── index.js 
+│       │   ├── index.js
 
-│ │ ├── routes/auth.js 
+│       │   ├── routes/auth.js
 
-│ │ ├── db/ 
+│       │   ├── db/
 
-│ │ │ ├── migrate.js 
+│       │   │   ├── migrate.js
 
-│ │ │ ├── seed.js 
+│       │   │   ├── seed.js
 
-│ │ │ └── pool.js 
+│       │   │   └── pool.js
 
-│ │ └── middleware/auth.js 
+│       │   └── middleware/auth.js
 
-│ ├── package.json 
+│       ├── package.json
 
-│ └── .env.example 
+│       └── .env.example
 
-└── frontend/ 
+└── frontend/
 
-├── src/ 
+├── src/
 
-│ ├── pages/ 
+│   ├── pages/
 
-│ ├── components/ 
+│   ├── components/
 
-│ ├── services/ 
+│   ├── services/
 
-│ └── hooks/ 
+│   └── hooks/
 
-├── Dockerfile 
+├── Dockerfile
 
 └── nginx.conf
 
@@ -71,8 +69,9 @@ vod-system/
 
 ### 1. Clone repo
 ```bash
-git clone https://github.com/truonglinh798021-crypto/vod-system.git
+git clone https://github.com/thaithuanlai/vod-system.git
 cd vod-system
+git checkout feature/linh
 ```
 
 ### 2. Tạo file .env
@@ -103,10 +102,27 @@ npm run dev
 ## Các Tasks
 
 - [x] Task 1: PostgreSQL Database Setup (Docker)
-- [ ] Task 2: Database Schema & Migration
+- [x] Task 2: Database Schema & Migration
 - [ ] Task 3: API Đăng ký (/register)
 - [ ] Task 4: API Đăng nhập & JWT (/login)
 - [ ] Task 5: React App Setup (Vite)
 - [ ] Task 6: Trang Register & Login
 - [ ] Task 7: Dockerfile & Docker Compose
->>>>>>> main
+
+## Chi tiết Tasks đã hoàn thành
+
+### Task 1: PostgreSQL Database Setup
+- Docker PostgreSQL 15 chạy trên port 5432
+- Database: `vod_users`, User: `vod_admin`
+- Cấu hình qua `docker-compose.yml` và `.env`
+
+### Task 2: Database Schema & Migration
+- Bảng `users` với các cột:
+  - `id` UUID PRIMARY KEY
+  - `email` VARCHAR(255) UNIQUE NOT NULL
+  - `password_hash` VARCHAR(255) NOT NULL
+  - `username` VARCHAR(100) NOT NULL
+  - `created_at` TIMESTAMP
+  - `updated_at` TIMESTAMP
+- Index trên cột `email`
+- Seed data: 1 user test (`test@vod.com`)
