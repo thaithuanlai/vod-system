@@ -105,8 +105,8 @@ npm run dev
 - [x] Task 2: Database Schema & Migration
 - [x] Task 3: API Đăng ký (/register)
 - [x] Task 4: API Đăng nhập & JWT (/login)
-- [ ] Task 5: React App Setup (Vite)
-- [ ] Task 6: Trang Register & Login
+- [x] Task 5: React App Setup (Vite)
+- [x] Task 6: Trang Register & Login
 - [ ] Task 7: Dockerfile & Docker Compose
 
 ## Chi tiết Tasks đã hoàn thành
@@ -145,3 +145,16 @@ npm run dev
 - Status codes:
   - `200 OK` — Đăng nhập thành công + accessToken
   - `401 Unauthorized` — Sai credentials
+
+  ### Task 5: Khởi tạo React App
+- Vite + React, port 5173
+- Cài: axios, react-router-dom, tailwindcss
+- Cấu trúc: pages/ components/ services/ hooks/
+- Proxy dev server → API port 3001
+
+### Task 6: Trang Register & Login
+- Trang /register: form đăng ký, validate, gọi API
+- Trang /login: form đăng nhập, lưu JWT localStorage
+- Redirect /dashboard sau login thành công
+- Protected routes: chưa login → redirect /login
+- Logout xóa token → redirect /login
