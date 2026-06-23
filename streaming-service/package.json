@@ -1,0 +1,21 @@
+{
+  "name": "streaming-service",
+  "version": "1.0.0",
+  "description": "Service phục vụ **HLS video streaming** từ Google Cloud Storage. Đọc file `.m3u8` và `.ts` từ GCS rồi stream về client.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

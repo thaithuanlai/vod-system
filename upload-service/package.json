@@ -1,0 +1,21 @@
+{
+    "name": "upload-service",
+    "version": "1.0.0",
+    "description": "Upload Service thuộc hệ thống VOD",
+    "main": "src/app.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/app.js",
+        "dev": "nodemon src/app.js"
+    },
+    "dependencies": {
+        "@google-cloud/storage": "^7.21.0",
+        "amqplib": "^2.0.1",
+        "express": "^4.19.2",
+        "multer": "^1.4.5-lts.1",
+        "uuid": "^14.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.0"
+    }
+}
