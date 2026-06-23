@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+@import "tailwindcss";
+=======
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,3 +23,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+>>>>>>> develop
