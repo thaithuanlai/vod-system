@@ -2,20 +2,29 @@
 Kiến trúc Microservices + Google Cloud Platform
 
 ## Công nghệ sử dụng
-- Backend: Node.js + Express
-- Database: PostgreSQL 15 (Docker local)
-- Frontend: React + Vite + TailwindCSS
-- Container: Docker + Docker Compose
-- Cloud: Google Cloud Platform
+| Thành phần | Công nghệ |
+|---|---|
+| Backend | Node.js + Express |
+| Database | PostgreSQL 15 |
+| Frontend | React + Vite + TailwindCSS |
+| Container | Docker + Docker Compose |
+| Cloud | Google Cloud Platform |
+
+## Yêu cầu môi trường
+| Công cụ | Version | Mục đích |
+|---|---|---|
+| Docker Desktop | >= 24.x | Chạy containers |
+| Node.js | >= 20.x | Chạy frontend dev |
+| Git | >= 2.x | Version control |
 
 ## Cấu trúc thư mục
 vod-system/
 
-├── .env
+├── .env                          # Biến môi trường
 
 ├── .gitignore
 
-├── docker-compose.yml
+├── docker-compose.yml            # Orchestrate toàn bộ services
 
 ├── README.md
 
@@ -27,76 +36,162 @@ vod-system/
 
 ├── services/
 
-│   └── user-service/
+│   └── user-service/             # Backend Node.js
 
 │       ├── src/
 
-│       │   ├── index.js
+│       │   ├── index.js          # Entry point Express
 
-│       │   ├── routes/auth.js
+│       │   ├── routes/
+
+│       │   │   └── auth.js       # API /register, /login
 
 │       │   ├── db/
 
-│       │   │   ├── migrate.js
+│       │   │   ├── migrate.js    # Tạo bảng users
 
-│       │   │   ├── seed.js
+│       │   │   ├── seed.js       # Seed data
 
-│       │   │   └── pool.js
+│       │   │   └── pool.js       # Kết nối PostgreSQL
 
-│       │   └── middleware/auth.js
+│       │   └── middleware/
+
+│       │       └── auth.js       # Verify JWT
 
 │       ├── package.json
 
 │       └── .env.example
 
-└── frontend/
+└── frontend/                     # React + Vite
 
 ├── src/
 
 │   ├── pages/
 
+│   │   ├── Login.jsx         # Trang đăng nhập
+
+│   │   ├── Register.jsx      # Trang đăng ký
+
+│   │   └── Dashboard.jsx     # Trang chính sau login
+
 │   ├── components/
 
 │   ├── services/
 
+│   │   └── api.js            # Axios config
+
 │   └── hooks/
 
-├── Dockerfile
+│       └── useAuth.js        # JWT localStorage logic
 
-└── nginx.conf
+├── Dockerfile                # Multi-stage build
+
+├── nginx.conf                # Nginx config
+
+└── vite.config.js            # Proxy config
 
 ## Cách chạy project
 
-### 1. Clone repo
+### Cách 1 — Docker (Khuyến nghị)
 ```bash
+# Clone repo
 git clone https://github.com/thaithuanlai/vod-system.git
 cd vod-system
 git checkout feature/linh
+
+# Khởi động toàn bộ hệ thống
+docker-compose up -d --build
+
+# Kiểm tra containers
+docker ps
 ```
 
-### 2. Tạo file .env
-```bash
-cp .env.example .env
-# Điền thông tin database vào .env
-```
+Truy cập:
+- Frontend: http://localhost:80
+- API: http://localhost:3001
 
-### 3. Khởi động Database
+### Cách 2 — Local Development
 ```bash
-docker-compose up -d
-```
+# Bước 1: Khởi động Database
+docker-compose up -d postgres
 
-### 4. Chạy User Service
-```bash
+# Bước 2: Chạy User Service
 cd services/user-service
 npm install
 npm start
-```
 
-### 5. Chạy Frontend
-```bash
+# Bước 3: Chạy Frontend (terminal mới)
 cd frontend
 npm install
 npm run dev
+```
+
+Truy cập:
+- Frontend: http://localhost:5173
+- API: http://localhost:3001
+
+## Biến môi trường
+Tạo file `.env` ở thư mục root:
+```env
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=vod_users
+DB_USER=vod_admin
+DB_PASSWORD=Vod2024Secure
+JWT_SECRET=vod_super_secret_key_2024
+JWT_EXPIRES_IN=24h
+```
+
+## Tài khoản test
+Email:    testlai@vod.com
+
+Password: Password123
+
+## API Endpoints
+| Method | Endpoint | Mô tả |
+|---|---|---|
+| POST | /api/auth/register | Đăng ký tài khoản |
+| POST | /api/auth/login | Đăng nhập + nhận JWT |
+
+### POST /api/auth/register
+```json
+// Request
+{
+  "email": "user@example.com",
+  "password": "Password123",
+  "username": "username"
+}
+
+// Response 201
+{
+  "message": "Đăng ký thành công",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "username": "username",
+    "created_at": "2024-xx-xx"
+  }
+}
+```
+
+### POST /api/auth/login
+```json
+// Request
+{
+  "email": "user@example.com",
+  "password": "Password123"
+}
+
+// Response 200
+{
+  "message": "Đăng nhập thành công",
+  "accessToken": "eyJhbGci...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "username": "username"
+  }
+}
 ```
 
 ## Các Tasks
@@ -107,9 +202,9 @@ npm run dev
 - [x] Task 4: API Đăng nhập & JWT (/login)
 - [x] Task 5: React App Setup (Vite)
 - [x] Task 6: Trang Register & Login
-- [ ] Task 7: Dockerfile & Docker Compose
+- [x] Task 7: Dockerfile & Docker Compose
 
-## Chi tiết Tasks đã hoàn thành
+## Chi tiết Tasks
 
 ### Task 1: PostgreSQL Database Setup
 - Docker PostgreSQL 15 chạy trên port 5432
@@ -125,7 +220,7 @@ npm run dev
   - `created_at` TIMESTAMP
   - `updated_at` TIMESTAMP
 - Index trên cột `email`
-- Seed data: 1 user test (`test@vod.com`)git add README.md
+- Seed data: 1 user test (`test@vod.com`)
 
 ### Task 3: API Đăng ký (/register)
 - Endpoint: `POST /api/auth/register`
@@ -137,7 +232,7 @@ npm run dev
   - `409 Conflict` — Email đã tồn tại
   - `400 Bad Request` — Dữ liệu không hợp lệ
 
-  ### Task 4: API Đăng nhập & JWT (/login)
+### Task 4: API Đăng nhập & JWT (/login)
 - Endpoint: `POST /api/auth/login`
 - Kiểm tra email tồn tại, so sánh bcrypt hash
 - Sinh JWT token (payload: userId, email, exp: 24h)
@@ -146,7 +241,7 @@ npm run dev
   - `200 OK` — Đăng nhập thành công + accessToken
   - `401 Unauthorized` — Sai credentials
 
-  ### Task 5: Khởi tạo React App
+### Task 5: Khởi tạo React App
 - Vite + React, port 5173
 - Cài: axios, react-router-dom, tailwindcss
 - Cấu trúc: pages/ components/ services/ hooks/
@@ -158,3 +253,10 @@ npm run dev
 - Redirect /dashboard sau login thành công
 - Protected routes: chưa login → redirect /login
 - Logout xóa token → redirect /login
+
+### Task 7: Dockerfile Frontend & Docker Compose
+- Dockerfile multi-stage: node:20-alpine build + nginx:alpine serve
+- Nginx proxy /api đến user-service
+- docker-compose.yml: postgres + user-service + frontend
+- Frontend chạy trên port 80
+- Image size < 100MB

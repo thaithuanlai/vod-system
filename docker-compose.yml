@@ -1,4 +1,40 @@
-version: '3.8'
+# version: '3.8'
+
+# services:
+#   postgres:
+#     image: postgres:15
+#     container_name: vod-postgres
+#     restart: always
+#     environment:
+#       POSTGRES_DB: vod_users
+#       POSTGRES_USER: vod_admin
+#       POSTGRES_PASSWORD: Vod2024Secure
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#   user-service:
+#     image: node:18-alpine
+#     container_name: vod-user-service
+#     working_dir: /app
+#     volumes:
+#       - ./services/user-service:/app
+#     ports:
+#       - "3001:3001"
+#     environment:
+#       DB_HOST: postgres
+#       DB_PORT: 5432
+#       DB_NAME: vod_users
+#       DB_USER: vod_admin
+#       DB_PASSWORD: Vod2024Secure
+#     depends_on:
+#       - postgres
+#     command: sh -c "npm install && node src/index.js"
+
+# volumes:
+#   postgres_data:
+
 
 services:
   postgres:
@@ -28,9 +64,22 @@ services:
       DB_NAME: vod_users
       DB_USER: vod_admin
       DB_PASSWORD: Vod2024Secure
+      JWT_SECRET: vod_super_secret_key_2024
+      JWT_EXPIRES_IN: 24h
     depends_on:
       - postgres
     command: sh -c "npm install && node src/index.js"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vod-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
 
 volumes:
   postgres_data:
