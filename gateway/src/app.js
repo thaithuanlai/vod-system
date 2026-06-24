@@ -1,14 +1,14 @@
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
-const rateLimit  = require('express-rate-limit');
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const rateLimit = require('express-rate-limit');
 
-const config          = require('./config');
-const logger          = require('./middleware/logger');
-const errorHandler    = require('./middleware/errorHandler');
-const authMiddleware  = require('./middleware/authMiddleware'); // ← Thêm dòng này
-const healthRouter    = require('./routes/health');
+const config                      = require('./config');
+const logger                      = require('./middleware/logger');
+const errorHandler                = require('./middleware/errorHandler');
+const authMiddleware              = require('./middleware/authMiddleware');
+const { registerProxyRoutes }     = require('./middleware/proxyMiddleware');
+const healthRouter                = require('./routes/health');
 
 const app = express();
 
@@ -17,46 +17,52 @@ app.use(helmet());
 
 // ─── 2. CORS ────────────────────────────────────────────────────
 app.use(cors({
-  origin: config.corsOrigins,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  origin:         config.corsOrigins,
+  methods:        ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  credentials:    true,
 }));
 
 // ─── 3. Request Logging ─────────────────────────────────────────
 app.use(logger);
 
 // ─── 4. Body Parser ─────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
+// LƯU Ý: Không parse body khi proxy file upload
+// express.json() chỉ parse /health và các routes nội bộ
+app.use((req, res, next) => {
+  // Bỏ qua body parsing với multipart (upload file)
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next();
+  }
+  express.json({ limit: '10mb' })(req, res, next);
+});
 app.use(express.urlencoded({ extended: true }));
 
 // ─── 5. Rate Limiting ───────────────────────────────────────────
 const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max:      config.rateLimit.max,
+  windowMs:       config.rateLimit.windowMs,
+  max:            config.rateLimit.max,
   message: {
     success: false,
     error: { message: 'Quá nhiều request. Vui lòng thử lại sau 15 phút.' },
   },
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders:   false,
 });
 app.use(limiter);
 
 // ─── 6. JWT Authentication ──────────────────────────────────────
-// Đặt sau logger để log request trước khi check auth
-// Đặt trước routes để bảo vệ tất cả routes phía sau
-app.use(authMiddleware); // ← Thêm dòng này
+app.use(authMiddleware);
 
-// ─── 7. Routes ──────────────────────────────────────────────────
+// ─── 7. Internal Routes (không proxy) ───────────────────────────
 app.get('/health', (req, res) => res.redirect('/api/health'));
 app.use('/api/health', healthRouter);
 
-// Placeholder cho T11 (proxy routing)
-// app.use('/auth',   proxy → user-service)
-// app.use('/upload', proxy → upload-service)
+// ─── 8. Proxy Routes → Microservices ────────────────────────────
+// Đăng ký tất cả proxy routes từ config/routes.js
+registerProxyRoutes(app);
 
-// ─── 8. 404 Handler ─────────────────────────────────────────────
+// ─── 9. 404 Handler ─────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -66,7 +72,7 @@ app.use((req, res) => {
   });
 });
 
-// ─── 9. Error Handler ───────────────────────────────────────────
+// ─── 10. Error Handler ──────────────────────────────────────────
 app.use(errorHandler);
 
 module.exports = app;
