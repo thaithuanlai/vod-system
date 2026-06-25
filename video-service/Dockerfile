@@ -1,26 +1,27 @@
-# Stage 1: build dependencies
-FROM node:20-alpine AS deps
+FROM node:20-alpine
+
+LABEL maintainer="VOD Team"
+LABEL service="video-service"
+
+RUN apk add --no-cache wget
+
 WORKDIR /app
-COPY package.json ./
-RUN npm install --omit=dev
 
-# Stage 2: production image
-FROM node:20-alpine AS runner
-WORKDIR /app
+COPY package.json package-lock.json* ./
 
-# Không chạy bằng root
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN npm ci --only=production 2>/dev/null || npm install --only=production
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY src ./src
-COPY package.json ./
+COPY . .
 
-USER appuser
+RUN addgroup -g 1001 -S nodejs && \
+    adduser  -u 1001 -S nodejs -G nodejs && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:3003/health || exit 1
 
 ENV NODE_ENV=production
-EXPOSE 3003
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD wget -qO- http://localhost:3003/health || exit 1
 
 CMD ["node", "src/index.js"]

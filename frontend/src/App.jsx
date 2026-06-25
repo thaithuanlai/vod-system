@@ -1,59 +1,58 @@
-<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Videos from './pages/Videos';
+import VideoDetail from './pages/VideoDetail';
 
-// Protected Route component
+// Protected Route component từ nhánh HEAD để bảo vệ các route bên trong
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   if (!token) {
     return <Navigate to="/login" replace />;
   }
-  return children;
-};
-
-function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <Navbar /> {/* Hiển thị thanh điều hướng sau khi đăng nhập */}
+      {children}
+    </>
   );
-}
-
-export default App;
-=======
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Videos from './pages/Videos'
-import VideoDetail from './pages/VideoDetail'
+};
 
 export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <Routes>
-          {/* Redirect trang chủ về /videos */}
-          <Route path="/" element={<Navigate to="/videos" replace />} />
+          {/* Các Route Public không cần token */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-          {/* Danh sách video - T36 */}
-          <Route path="/videos" element={<Videos />} />
+          {/* Các Route cần Bảo mật - Chỉ cho phép truy cập sau khi login */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Navigate to="/videos" replace />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
 
-          {/* Chi tiết + player video - T37 */}
-          <Route path="/videos/:id" element={<VideoDetail />} />
+          <Route path="/videos" element={
+            <ProtectedRoute>
+              <Videos />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/videos/:id" element={
+            <ProtectedRoute>
+              <VideoDetail />
+            </ProtectedRoute>
+          } />
 
           {/* 404 fallback */}
           <Route path="*" element={
@@ -68,6 +67,5 @@ export default function App() {
         </Routes>
       </div>
     </BrowserRouter>
-  )
+  );
 }
->>>>>>> develop

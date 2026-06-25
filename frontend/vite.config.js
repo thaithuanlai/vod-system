@@ -5,17 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-<<<<<<< HEAD
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      }
-    }
-  }
-})
-=======
-    // Proxy API calls tới gateway khi dev local
+    // Proxy API calls tới API Gateway khi dev local
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
@@ -25,4 +15,3 @@ export default defineConfig({
     },
   },
 })
->>>>>>> develop
