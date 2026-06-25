@@ -65,6 +65,17 @@ const createServiceProxy = (route) => {
         console.log(
           `[Proxy] → ${serviceName} | ${req.method} ${req.path}`
         );
+
+        // ── FIX: Re-attach body đã bị Express body-parser consume ──
+        // Khi express.json() đọc body trước, req stream đã hết.
+        // Phải serialize lại req.body và ghi vào proxyReq.
+        if (req.body && Object.keys(req.body).length > 0) {
+          const bodyStr = JSON.stringify(req.body);
+          proxyReq.setHeader('Content-Type', 'application/json');
+          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyStr));
+          proxyReq.write(bodyStr);
+          proxyReq.end();
+        }
       },
       proxyRes: (proxyRes, req) => {
         console.log(

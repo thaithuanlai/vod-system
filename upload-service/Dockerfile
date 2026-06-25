@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
 LABEL maintainer="VOD Team"
-LABEL service="notification-service"
+LABEL service="upload-service"
 
 RUN apk add --no-cache wget
 
@@ -20,8 +20,8 @@ RUN addgroup -g 1001 -S nodejs && \
 USER nodejs
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD wget -qO- http://localhost:3006/health || exit 1
+  CMD wget -qO- http://localhost:3002/health || exit 1
 
 ENV NODE_ENV=production
 
-CMD ["node", "src/index.js"]
+CMD ["node", "src/app.js"]

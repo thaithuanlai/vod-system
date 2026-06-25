@@ -13,8 +13,12 @@ app.use(cors());
 app.use(express.json());
 
 // Khởi tạo Firestore
-initFirestore();
-console.log('✅ Firestore initialized');
+try {
+  initFirestore();
+  console.log('✅ Firestore initialized');
+} catch (err) {
+  console.warn('⚠️ Firestore chưa khởi tạo (credentials placeholder?):', err.message);
+}
 
 // Routes
 app.get('/health', (req, res) => {

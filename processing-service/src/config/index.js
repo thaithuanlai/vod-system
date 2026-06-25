@@ -24,7 +24,7 @@ const config = {
   env: process.env.NODE_ENV || 'development',
 
   // Cổng HTTP cho health check endpoint
-  port: parseInt(process.env.PROCESSING_SERVICE_PORT || '3004', 10),
+  port: parseInt(process.env.PORT || process.env.PROCESSING_SERVICE_PORT || '3004', 10),
 
   // --- URL các service liên quan ---
   videoServiceUrl: process.env.VIDEO_SERVICE_URL || 'http://localhost:3003',

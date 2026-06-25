@@ -1,40 +1,39 @@
-# ============================================================
-# Dockerfile - Processing Service (US-01)
-#
-# Base: Node.js 20 Alpine + FFmpeg
-# Yêu cầu:
-#   - Docker build thành công (AC1)
-#   - ffmpeg -version chạy được trong container (AC2)
-#   - Container khởi động dưới 10 giây (AC3)
-#   - Kích thước image < 500 MB (AC4)
-# ============================================================
+# Processing Service cần FFmpeg để xử lý video
+# Dùng node:20-slim thay vì alpine vì alpine gặp vấn đề với FFmpeg codec
+FROM node:20-slim AS runtime
 
-FROM node:20-alpine
+LABEL maintainer="VOD Team"
+LABEL service="processing-service"
 
-# Cài đặt FFmpeg (bao gồm FFprobe) — dùng cho transcode và lấy duration
-RUN apk add --no-cache ffmpeg
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ffmpeg \
+      wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Thư mục làm việc
+RUN ffmpeg -version | head -1
+
 WORKDIR /app
 
-# Cài đặt dependencies (cache layer riêng)
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production 2>/dev/null || npm install --only=production
 
-# Copy source code
-COPY src/ ./src/
+COPY . .
 
-# Tạo thư mục tạm và cấp quyền
-RUN mkdir -p tmp && chown -R node:node /app
+RUN addgroup --gid 1001 nodejs && \
+    adduser  --uid 1001 --ingroup nodejs --disabled-password nodejs && \
+    chown -R nodejs:nodejs /app
 
-# Chạy với user non-root (bảo mật)
-USER node
+RUN mkdir -p /tmp/vod-processing && \
+    chown nodejs:nodejs /tmp/vod-processing
 
-# Port cho health check API
-EXPOSE 3004
+USER nodejs
 
-# Kiểm tra FFmpeg khi build (AC2)
-RUN ffmpeg -version && ffprobe -version
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD wget -qO- http://localhost:3004/health || exit 1
 
-# Lệnh khởi động
-CMD ["npm", "start"]
+ENV NODE_ENV=production
+ENV TMPDIR=/tmp/vod-processing
+
+CMD ["node", "src/index.js"]

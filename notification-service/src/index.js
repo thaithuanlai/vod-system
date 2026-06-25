@@ -27,8 +27,12 @@ app.use(errorMiddleware);
 // Khởi động service
 async function main() {
   // 1. Kết nối Firestore
-  initFirestore();
-  console.log('✅ Firestore initialized');
+  try {
+    initFirestore();
+    console.log('✅ Firestore initialized');
+  } catch (err) {
+    console.warn('⚠️ Firestore chưa khởi tạo (credentials placeholder?):', err.message);
+  }
 
   // 2. Kết nối RabbitMQ rồi bắt đầu consume
   try {

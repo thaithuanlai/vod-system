@@ -1,17 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { Pool } = require('pg');
-require('dotenv').config();
+const pool = require('../db/pool');
 
-// Kết nối PostgreSQL trực tiếp
-const pool = new Pool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'vod_users',
-  user: process.env.DB_USER || 'vod_admin',
-  password: process.env.DB_PASSWORD || 'Vod2024Secure',
-});
 
 // ==========================================
 // POST /api/auth/register — Đăng ký tài khoản
