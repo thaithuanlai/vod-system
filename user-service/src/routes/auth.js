@@ -127,12 +127,17 @@ router.post('/login', async (req, res) => {
 
     // Bước 5: Sinh JWT token
     const jwt = require('jsonwebtoken');
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'Server Error', message: 'JWT_SECRET chưa được cấu hình' });
+    }
+
     const token = jwt.sign(
       {
         userId: user.id,
         email: user.email
       },
-      process.env.JWT_SECRET || 'vod_super_secret_key_2024',
+      process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 

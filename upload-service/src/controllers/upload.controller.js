@@ -29,8 +29,11 @@ export const uploadVideo = (req, res) => {
         }
 
         try {
-            // Giả lập lấy userId từ JWT Token (được API Gateway giải mã và truyền qua header)
-            const userId = req.headers['x-user-id'] || 'user_default_123';
+            // Lấy userId từ header do API Gateway forward sau khi verify JWT
+            const userId = req.headers['x-user-id'];
+            if (!userId) {
+                return res.status(401).json({ success: false, message: 'Unauthorized: Thiếu thông tin user.' });
+            }
 
             console.log(`[Upload Flow] Bắt đầu xử lý file: ${req.file.originalname}`);
 

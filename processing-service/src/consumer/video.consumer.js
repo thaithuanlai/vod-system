@@ -145,10 +145,10 @@ async function updateVideoService(videoId, data) {
   const url = `${config.videoServiceUrl}/api/videos/${videoId}`;
 
   try {
-    logger.info(`Gọi Video Service: PUT ${url}`, { data });
+    logger.info(`Gọi Video Service: PATCH ${url}`, { data });
 
     const response = await fetch(url, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
