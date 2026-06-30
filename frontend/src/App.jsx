@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Videos from './pages/Videos';
 import VideoDetail from './pages/VideoDetail';
+import Upload from './pages/Upload';
 
 // Protected Route component từ nhánh HEAD để bảo vệ các route bên trong
 const ProtectedRoute = ({ children }) => {
@@ -39,6 +40,12 @@ export default function App() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/upload" element={
+            <ProtectedRoute>
+              <Upload />
             </ProtectedRoute>
           } />
 

@@ -8,7 +8,7 @@ const pool = new Pool(
         port:     parseInt(process.env.DB_PORT || '5432', 10),
         database: process.env.DB_NAME     || 'vod_users',
         user:     process.env.DB_USER     || 'vod_admin',
-        password: process.env.DB_PASSWORD || 'Vod2024Secure',
+        password: process.env.DB_PASSWORD,
       }
 );
 

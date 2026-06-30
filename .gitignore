@@ -1,13 +1,10 @@
-<<<<<<< HEAD
-node_modules/ 
-=======
 # Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment Variables
+# Environment Variables (QUAN TRỌNG - chứa secrets)
 .env
 .env.local
 .env.development.local
@@ -48,4 +45,3 @@ temp/
 
 # Coverage
 coverage/
->>>>>>> develop

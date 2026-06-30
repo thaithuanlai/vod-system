@@ -15,9 +15,11 @@ const config = {
     notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3006',
   },
 
-  corsOrigins: process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  corsOrigins: process.env.CORS_ORIGINS === '*'
+    ? true // true tells cors to reflect the exact request origin, needed when credentials=true
+    : process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(',')
+      : ['http://localhost:5173', 'http://localhost:3000'],
 
   rateLimit: {
     windowMs: 15 * 60 * 1000,

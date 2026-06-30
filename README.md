@@ -1,338 +1,113 @@
-<<<<<<< HEAD
-# Hệ thống Lưu trữ và Phân phối Nội dung Video (VOD)
-Kiến trúc Microservices + Google Cloud Platform
-
-## Công nghệ sử dụng
-| Thành phần | Công nghệ |
-|---|---|
-| Backend | Node.js + Express |
-| Database | PostgreSQL 15 |
-| Frontend | React + Vite + TailwindCSS |
-| Container | Docker + Docker Compose |
-| Cloud | Google Cloud Platform |
-
-## Yêu cầu môi trường
-| Công cụ | Version | Mục đích |
-|---|---|---|
-| Docker Desktop | >= 24.x | Chạy containers |
-| Node.js | >= 20.x | Chạy frontend dev |
-| Git | >= 2.x | Version control |
-
-## Cấu trúc thư mục
-vod-system/
-
-├── .env                          # Biến môi trường
-
-├── .gitignore
-
-├── docker-compose.yml            # Orchestrate toàn bộ services
-
-├── README.md
-
-├── infra/
-
-│   ├── setup-gcp.sh
-
-│   └── start-proxy.sh
-
-├── services/
-
-│   └── user-service/             # Backend Node.js
-
-│       ├── src/
-
-│       │   ├── index.js          # Entry point Express
-
-│       │   ├── routes/
-
-│       │   │   └── auth.js       # API /register, /login
-
-│       │   ├── db/
-
-│       │   │   ├── migrate.js    # Tạo bảng users
-
-│       │   │   ├── seed.js       # Seed data
-
-│       │   │   └── pool.js       # Kết nối PostgreSQL
-
-│       │   └── middleware/
-
-│       │       └── auth.js       # Verify JWT
-
-│       ├── package.json
-
-│       └── .env.example
-
-└── frontend/                     # React + Vite
-
-├── src/
-
-│   ├── pages/
-
-│   │   ├── Login.jsx         # Trang đăng nhập
-
-│   │   ├── Register.jsx      # Trang đăng ký
-
-│   │   └── Dashboard.jsx     # Trang chính sau login
-
-│   ├── components/
-
-│   ├── services/
-
-│   │   └── api.js            # Axios config
-
-│   └── hooks/
-
-│       └── useAuth.js        # JWT localStorage logic
-
-├── Dockerfile                # Multi-stage build
-
-├── nginx.conf                # Nginx config
-
-└── vite.config.js            # Proxy config
-
-## Cách chạy project
-
-### Cách 1 — Docker (Khuyến nghị)
-```bash
-# Clone repo
-git clone https://github.com/thaithuanlai/vod-system.git
-cd vod-system
-git checkout feature/linh
-
-# Khởi động toàn bộ hệ thống
-docker-compose up -d --build
-
-# Kiểm tra containers
-docker ps
-```
-
-Truy cập:
-- Frontend: http://localhost:80
-- API: http://localhost:3001
-
-### Cách 2 — Local Development
-```bash
-# Bước 1: Khởi động Database
-docker-compose up -d postgres
-
-# Bước 2: Chạy User Service
-cd services/user-service
-npm install
-npm start
-
-# Bước 3: Chạy Frontend (terminal mới)
-cd frontend
-npm install
-npm run dev
-```
-
-Truy cập:
-- Frontend: http://localhost:5173
-- API: http://localhost:3001
-
-## Biến môi trường
-Tạo file `.env` ở thư mục root:
-```env
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_NAME=vod_users
-DB_USER=vod_admin
-DB_PASSWORD=Vod2024Secure
-JWT_SECRET=vod_super_secret_key_2024
-JWT_EXPIRES_IN=24h
-```
-
-## Tài khoản test
-Email:    testlai@vod.com
-
-Password: Password123
-
-## API Endpoints
-| Method | Endpoint | Mô tả |
-|---|---|---|
-| POST | /api/auth/register | Đăng ký tài khoản |
-| POST | /api/auth/login | Đăng nhập + nhận JWT |
-
-### POST /api/auth/register
-```json
-// Request
-{
-  "email": "user@example.com",
-  "password": "Password123",
-  "username": "username"
-}
-
-// Response 201
-{
-  "message": "Đăng ký thành công",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "username": "username",
-    "created_at": "2024-xx-xx"
-  }
-}
-```
-
-### POST /api/auth/login
-```json
-// Request
-{
-  "email": "user@example.com",
-  "password": "Password123"
-}
-
-// Response 200
-{
-  "message": "Đăng nhập thành công",
-  "accessToken": "eyJhbGci...",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "username": "username"
-  }
-}
-```
-
-## Các Tasks
-
-- [x] Task 1: PostgreSQL Database Setup (Docker)
-- [x] Task 2: Database Schema & Migration
-- [x] Task 3: API Đăng ký (/register)
-- [x] Task 4: API Đăng nhập & JWT (/login)
-- [x] Task 5: React App Setup (Vite)
-- [x] Task 6: Trang Register & Login
-- [x] Task 7: Dockerfile & Docker Compose
-
-## Chi tiết Tasks
-
-### Task 1: PostgreSQL Database Setup
-- Docker PostgreSQL 15 chạy trên port 5432
-- Database: `vod_users`, User: `vod_admin`
-- Cấu hình qua `docker-compose.yml` và `.env`
-
-### Task 2: Database Schema & Migration
-- Bảng `users` với các cột:
-  - `id` UUID PRIMARY KEY
-  - `email` VARCHAR(255) UNIQUE NOT NULL
-  - `password_hash` VARCHAR(255) NOT NULL
-  - `username` VARCHAR(100) NOT NULL
-  - `created_at` TIMESTAMP
-  - `updated_at` TIMESTAMP
-- Index trên cột `email`
-- Seed data: 1 user test (`test@vod.com`)
-
-### Task 3: API Đăng ký (/register)
-- Endpoint: `POST /api/auth/register`
-- Validate email format, password tối thiểu 8 ký tự
-- Hash password bằng bcrypt salt rounds=12
-- Trả về user object không có password
-- Status codes:
-  - `201 Created` — Đăng ký thành công
-  - `409 Conflict` — Email đã tồn tại
-  - `400 Bad Request` — Dữ liệu không hợp lệ
-
-### Task 4: API Đăng nhập & JWT (/login)
-- Endpoint: `POST /api/auth/login`
-- Kiểm tra email tồn tại, so sánh bcrypt hash
-- Sinh JWT token (payload: userId, email, exp: 24h)
-- Không tiết lộ email có tồn tại hay không
-- Status codes:
-  - `200 OK` — Đăng nhập thành công + accessToken
-  - `401 Unauthorized` — Sai credentials
-
-### Task 5: Khởi tạo React App
-- Vite + React, port 5173
-- Cài: axios, react-router-dom, tailwindcss
-- Cấu trúc: pages/ components/ services/ hooks/
-- Proxy dev server → API port 3001
-
-### Task 6: Trang Register & Login
-- Trang /register: form đăng ký, validate, gọi API
-- Trang /login: form đăng nhập, lưu JWT localStorage
-- Redirect /dashboard sau login thành công
-- Protected routes: chưa login → redirect /login
-- Logout xóa token → redirect /login
-
-### Task 7: Dockerfile Frontend & Docker Compose
-- Dockerfile multi-stage: node:20-alpine build + nginx:alpine serve
-- Nginx proxy /api đến user-service
-- docker-compose.yml: postgres + user-service + frontend
-- Frontend chạy trên port 80
-- Image size < 100MB
-=======
-# 🎬 VOD System — Microservices + Google Cloud Platform
-
-Hệ thống Video On Demand (VOD) xây dựng theo kiến trúc Microservices, triển khai trên Google Cloud Platform.
-
-## 🏗️ Kiến trúc
+# 🎬 VOD System — Hệ thống Lưu trữ và Phân phối Nội dung Video
+Kiến trúc Microservices triển khai trên Google Cloud Platform.
+
+## 🏗️ Kiến trúc Hệ thống
+Hệ thống được chia thành 8 Microservices giao tiếp qua API Gateway và Message Queue (RabbitMQ).
 
 ```text
-Client → API Gateway (3000)
-├── User Service (3001)       - PostgreSQL
-├── Upload Service (3002)     - Google Cloud Storage
-├── Video Service (3003)      - Firestore
-├── Processing Service (3004) - FFmpeg + GCS
-├── Streaming Service (3005)  - GCS HLS
-└── Notification Service (3006) - Firestore
+Client (React) → API Gateway (:3000)
+├── User Service (:3001)       - PostgreSQL (Quản lý User, Auth JWT)
+├── Upload Service (:3002)     - GCS (Nhận file raw upload)
+├── Video Service (:3003)      - Firestore (CRUD Metadata Video)
+├── Processing Service (:3004) - FFmpeg + GCS (Worker: Transcode HLS đa độ phân giải)
+├── Streaming Service (:3005)  - GCS (Phân phối luồng HLS phẳng)
+└── Notification Service (:3006) - Firestore (Thông báo realtime)
 ↕
-RabbitMQ (Message Queue)
+RabbitMQ (Message Broker điều phối tiến trình Upload -> Processing)
 ```
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
+## 🛠️ Công nghệ sử dụng
+| Lớp (Layer) | Công nghệ |
 |---|---|
 | **Frontend** | React.js + Vite + TailwindCSS |
 | **Backend** | Node.js 20 + Express |
-| **User DB** | Google Cloud SQL (PostgreSQL 15) |
-| **Video Metadata** | Google Firestore |
-| **Object Storage** | Google Cloud Storage (GCS) |
+| **Database** | PostgreSQL (User) + Google Firestore (Video/NoSQL) |
+| **Storage** | Google Cloud Storage (GCS) |
 | **Message Queue** | RabbitMQ |
-| **Video Processing** | FFmpeg (HLS) |
-| **Containerization**| Docker + Docker Compose |
-| **Deployment** | Google Cloud Run |
+| **Video Processing** | FFmpeg (chuyển đổi m3u8/ts) |
+| **Deployment** | Docker Compose (Local) / Google Cloud Run (GCP Production) |
 
-## 🚀 Quick Start
+## 🚀 Hướng dẫn Cài đặt & Chạy Local cho Nhóm
 
-### Prerequisites
-- Node.js >= 20
-- Docker Desktop
-- Google Cloud SDK (gcloud CLI)
+### 1. Yêu cầu môi trường (Prerequisites)
+- [Node.js](https://nodejs.org/en) (>= 20.x)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- File `credentials.json` (Service Account GCP có quyền Storage Admin & Datastore User)
 
-### Local Development
-
+### 2. Cấu hình biến môi trường (.env)
+Mở terminal tại thư mục gốc (`vod-system`) và sao chép file `.env.example` thành `.env`:
 ```bash
-# 1. Clone repository
-git clone https://github.com/thaithuanlai/vod-system.git
-cd vod-system
-
-# 2. Cấu hình môi trường
 cp .env.example .env
-# Điền values vào .env
+```
+Mở file `.env` và điền đầy đủ các thông tin:
+- **GCP Credentials:** Trỏ đường dẫn tuyệt đối tới file `credentials.json` (Để chạy Docker thì nên mount file này vào trong container, xem `docker-compose.yml`).
+- **Project ID, Bucket Name** của dự án GCP.
+- **RabbitMQ URL** (Mặc định nếu chạy docker: `amqp://admin:admin@rabbitmq:5672`).
+- **Postgres DB Config** (Mặc định dùng chung với Docker network).
 
-# 3. Khởi động tất cả services
-docker-compose up --build
+### 3. Chạy toàn bộ hệ thống bằng Docker Compose
+Đây là cách nhanh nhất để khởi động toàn bộ hệ thống (8 services + PostgreSQL + RabbitMQ) bằng một lệnh duy nhất:
+```bash
+# Xoá cache cũ (nếu có) và build lại toàn bộ image
+docker-compose build --no-cache
+
+# Khởi động ẩn dưới nền
+docker-compose up -d
 ```
 
-### Services URLs (local)
-- **API Gateway:** http://localhost:3000
-- **RabbitMQ Management:** http://localhost:15672
+**Các cổng (Ports) đang mở ở Local:**
+- **Frontend Web:** [http://localhost:5173](http://localhost:5173) (Hoặc tuỳ cấu hình Nginx trong Docker của Frontend)
+- **API Gateway:** [http://localhost:3000](http://localhost:3000) (Tất cả gọi API qua đây)
+- **RabbitMQ Management UI:** [http://localhost:15672](http://localhost:15672) (user: `admin`, pass: `admin`)
+- **Postgres Database:** `5432`
+
+Để dừng và xoá toàn bộ containers:
+```bash
+docker-compose down
+```
+
+## ☁️ Hướng dẫn Triển khai lên Google Cloud Platform (Production)
+
+Hệ thống đã được thiết kế chuẩn hoá để chạy Serverless trên **Google Cloud Run**.
+
+**Bước 1:** Cấu hình GCP CLI & Xác thực
+```bash
+gcloud auth login
+gcloud config set project [PROJECT_ID]
+```
+
+**Bước 2:** Build và Push Image lên Artifact Registry
+Ví dụ đối với `streaming-service`:
+```bash
+cd streaming-service
+gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/vod-docker-repo/streaming-service:latest .
+```
+
+**Bước 3:** Deploy lên Cloud Run
+```bash
+gcloud run deploy streaming-service \
+  --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/vod-docker-repo/streaming-service:latest \
+  --region asia-southeast1 \
+  --allow-unauthenticated
+```
+*(⚠️ Lưu ý cực kỳ quan trọng: `processing-service` cần chạy chế độ Background Worker. Khi deploy nhớ bắt buộc thêm cờ `--no-cpu-throttling` và cấu hình bộ nhớ `--memory=2Gi` để FFmpeg không bị văng OOM).*
+
+**Bước 4:** Cập nhật biến môi trường cho Frontend
+Khi deploy Frontend, cần truyền URL của API Gateway sản xuất (Production Gateway) vào biến môi trường trong lúc Build:
+```bash
+cd frontend
+gcloud builds submit --config=cloudbuild.yaml --substitutions=_API_GATEWAY_URL="https://[PROD_GATEWAY_URL]"
+```
 
 ## 👥 Nhóm thực hiện
 
-| Thành viên | Vai trò | Services |
+| Thành viên | Vai trò | Services Phụ trách |
 |---|---|---|
-| **Thai Thuan Lai (Lead)** | API Gateway + Integration | `gateway/` |
-| **Che Linh Truong** | User Service + Frontend | `user-service/`, `frontend/` |
-| **Trung Hau Nguyen** | Upload Service | `upload-service/` |
-| **Tinh Nghia Nguyen** | Processing Service | `processing-service/` |
-| **Thi Tuyet Nhi Nguyen** | Video/Stream/Notify | `video-service/`, `streaming-service/`, `notification-service/` |
+| **Thai Thuan Lai (Lead)** | System Architect, API Gateway | `gateway/`, Setup GCP Hạ tầng |
+| **Che Linh Truong** | Auth, Database PostgreSQL, Frontend UI | `user-service/`, `frontend/` |
+| **Trung Hau Nguyen** | Storage API, Nhận file Raw upload | `upload-service/` |
+| **Tinh Nghia Nguyen** | FFmpeg Worker (Background Transcoding) | `processing-service/` |
+| **Thi Tuyet Nhi Nguyen**| HLS Streaming (Cấu trúc phẳng), Firestore Metadata, Server-Sent Events | `video-service/`, `streaming-service/`, `notification-service/` |
 
-## 📅 Deadline
-* 25/06/2025
-
-## 📖 Tài liệu
-Xem chi tiết trong thư mục `docs/` hoặc Google Docs của nhóm.
->>>>>>> develop
+---
+*VOD System 2025.*

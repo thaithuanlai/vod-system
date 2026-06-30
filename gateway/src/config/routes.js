@@ -51,7 +51,7 @@ const ROUTES = [
   {
     prefix:      '/stream',
     target:      config.services.streaming,
-    protected:   true,
+    protected:   false,
     rewrite:     false,
     timeout:     30000,
     description: 'Streaming Service — HLS Playlist & Segments',

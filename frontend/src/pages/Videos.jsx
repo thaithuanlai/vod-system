@@ -2,8 +2,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { fetchVideos } from '../services/videoApi';
 import VideoCard from '../components/VideoCard';
 
-// User ID tạm thời - thực tế lấy từ auth context
-const DEMO_USER_ID = 'user001';
+// Lấy userId từ localStorage (được lưu khi login)
+function getUserId() {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.id;
+  } catch { return undefined; }
+}
+
 const PAGE_SIZE = 12;
 const POLL_INTERVAL_MS = 10000; // 10 giây
 
@@ -17,7 +23,7 @@ export default function Videos() {
     if (showLoader) setLoading(true);
     setError(null);
     try {
-      const data = await fetchVideos(DEMO_USER_ID, limit);
+      const data = await fetchVideos(getUserId(), limit);
       setVideos(data);
     } catch (err) {
       setError(err.message);

@@ -23,8 +23,8 @@ export const createInitialMetadata = async (metadataPayload) => {
         }
 
         const result = await response.json();
-        // Trả về videoId được tạo ra từ database Firestore của Video Service
-        return result.data.videoId;
+        // Trả về id được tạo ra từ database Firestore của Video Service (lưu ý: Firestore trả về field 'id')
+        return result.data.id || result.data.videoId;
     } catch (error) {
         console.error(`[Video Service Connection Error] Thất bại khi tạo metadata: ${error.message}`);
         throw error;

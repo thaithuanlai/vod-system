@@ -7,10 +7,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Routes ─────────────────────────────────────────────────────
-// Đăng ký routes — gateway strip prefix /auth trước khi forward
-// nên user-service nhận /login, /register (không có /auth)
+// Đăng ký routes — gateway gửi req với nguyên prefix /auth
 const authRoutes = require('./routes/auth');
-app.use('/', authRoutes);
+app.use('/auth', authRoutes);
 
 // ─── Health Check ───────────────────────────────────────────────
 app.get('/health', (req, res) => {

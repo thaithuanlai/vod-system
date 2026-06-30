@@ -1,4 +1,4 @@
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const { createProxyMiddleware, fixRequestBody } = require('http-proxy-middleware');
 const timeoutMiddleware = require('./timeoutMiddleware');
 const ROUTES = require('../config/routes');
 
@@ -58,24 +58,13 @@ const createServiceProxy = (route) => {
   const proxy = createProxyMiddleware({
     target:       route.target,
     changeOrigin: true,    // Đổi Host header thành target host
-
+    pathRewrite:  (path, req) => req.originalUrl, // Không strip prefix
     // Ghi log mỗi lần proxy request
     on: {
-      proxyReq: (proxyReq, req) => {
+      proxyReq: (proxyReq, req, res) => {
         console.log(
           `[Proxy] → ${serviceName} | ${req.method} ${req.path}`
         );
-
-        // ── FIX: Re-attach body đã bị Express body-parser consume ──
-        // Khi express.json() đọc body trước, req stream đã hết.
-        // Phải serialize lại req.body và ghi vào proxyReq.
-        if (req.body && Object.keys(req.body).length > 0) {
-          const bodyStr = JSON.stringify(req.body);
-          proxyReq.setHeader('Content-Type', 'application/json');
-          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyStr));
-          proxyReq.write(bodyStr);
-          proxyReq.end();
-        }
       },
       proxyRes: (proxyRes, req) => {
         console.log(

@@ -96,4 +96,26 @@ async function getSegment(req, res) {
   await streamFromGCS(req, res, gcsPath, MIME_TYPES.ts);
 }
 
-module.exports = { getMasterPlaylist, getQualityPlaylist, getSegment };
+/**
+ * GET /stream/:videoId/:file
+ * Phục vụ cấu trúc phẳng do processing-service tạo ra
+ * Ví dụ: /stream/video001/master.m3u8, /stream/video001/360p.m3u8, /stream/video001/360p_000.ts
+ */
+async function getFileFlat(req, res) {
+  const { videoId, file } = req.params;
+
+  // Validate tên file để tránh path traversal
+  if (!/^[\w\-]+\.(m3u8|ts)$/.test(file)) {
+    return res.status(400).json({ success: false, message: 'Tên file không hợp lệ' });
+  }
+
+  const gcsPath = `${HLS_PREFIX}/${videoId}/${file}`;
+  console.log(`[stream] file flat → ${gcsPath}`);
+  
+  const isTs = file.endsWith('.ts');
+  const mimeType = isTs ? MIME_TYPES.ts : MIME_TYPES.m3u8;
+
+  await streamFromGCS(req, res, gcsPath, mimeType);
+}
+
+module.exports = { getMasterPlaylist, getQualityPlaylist, getSegment, getFileFlat };
