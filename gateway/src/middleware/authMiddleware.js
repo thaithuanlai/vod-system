@@ -31,6 +31,9 @@ const isPublicRoute = (method, path) => {
   // (Phòng trường hợp thêm route auth mới sau này)
   if (path.startsWith('/auth/')) return true;
 
+  // HLS stream routes (video playback) phải là public
+  if (path.startsWith('/stream/')) return true;
+
   return false;
 };
 

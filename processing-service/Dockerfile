@@ -21,8 +21,8 @@ RUN npm ci --only=production 2>/dev/null || npm install --only=production
 
 COPY . .
 
-RUN addgroup --gid 1001 nodejs && \
-    adduser  --uid 1001 --ingroup nodejs --disabled-password nodejs && \
+RUN groupadd -r nodejs -g 1001 && \
+    useradd -r -g nodejs -u 1001 -m -d /home/nodejs -s /sbin/nologin nodejs && \
     chown -R nodejs:nodejs /app
 
 RUN mkdir -p /tmp/vod-processing && \

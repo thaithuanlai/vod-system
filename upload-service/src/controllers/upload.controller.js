@@ -58,6 +58,7 @@ export const uploadVideo = (req, res) => {
             const mqPayload = {
                 videoId,
                 gcsPath: gcsResult.gcsPath,
+                filename: gcsResult.gcsPath.split('/').pop(), // Lấy tên file gốc uuid.mp4
                 originalName: gcsResult.originalName,
                 userId,
                 uploadedAt: metadataPayload.createdAt

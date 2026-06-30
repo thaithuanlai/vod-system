@@ -142,7 +142,7 @@ export async function initVideoConsumer() {
  * @param {object} data    - Dữ liệu cập nhật
  */
 async function updateVideoService(videoId, data) {
-  const url = `${config.videoServiceUrl}/api/videos/${videoId}`;
+  const url = `${config.videoServiceUrl}/videos/${videoId}`;
 
   try {
     logger.info(`Gọi Video Service: PATCH ${url}`, { data });

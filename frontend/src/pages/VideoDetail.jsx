@@ -4,7 +4,8 @@ import { fetchVideoById } from '../services/videoApi';
 import StatusBadge from '../components/StatusBadge';
 import HlsPlayer from '../components/HlsPlayer';
 
-const STREAMING_URL = import.meta.env.VITE_STREAMING_SERVICE_URL || 'http://localhost:3005';
+const GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:3000';
+const STREAMING_URL = import.meta.env.VITE_STREAMING_SERVICE_URL || GATEWAY_URL;
 
 // Format ngày giờ
 function formatDate(val) {

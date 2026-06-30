@@ -195,6 +195,7 @@ services:
       GCS_RAW_VIDEO_FOLDER:    raw-videos
       GCS_HLS_OUTPUT_FOLDER:   hls-outputs
       GOOGLE_APPLICATION_CREDENTIALS: /app/credentials.json
+      VIDEO_SERVICE_URL:       http://video-service:3003
     volumes:
       - ${GOOGLE_APPLICATION_CREDENTIALS:-./credentials.json}:/app/credentials.json:ro
       - processing-tmp:/tmp/vod-processing

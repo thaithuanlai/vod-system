@@ -27,16 +27,8 @@ app.use(cors({
 app.use(logger);
 
 // ─── 4. Body Parser ─────────────────────────────────────────────
-// LƯU Ý: Không parse body khi proxy file upload
-// express.json() chỉ parse /health và các routes nội bộ
-app.use((req, res, next) => {
-  // Bỏ qua body parsing với multipart (upload file)
-  if (req.headers['content-type']?.includes('multipart/form-data')) {
-    return next();
-  }
-  express.json({ limit: '10mb' })(req, res, next);
-});
-app.use(express.urlencoded({ extended: true }));
+// ĐÃ XÓA: API Gateway KHÔNG NÊN parse body vì nó sẽ consume stream của proxy.
+// Để các downstream microservices tự parse body.
 
 // ─── 5. Rate Limiting ───────────────────────────────────────────
 const limiter = rateLimit({
