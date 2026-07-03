@@ -119,6 +119,34 @@ class StorageService {
   }
 
   // ==========================================================================
+  // UPLOAD THUMBNAIL LÊN GCS (US-06)
+  // ==========================================================================
+
+  /**
+   * Upload ảnh thumbnail lên GCS
+   * @param {string} localPath - Đường dẫn file thumbnail local (.jpg)
+   * @param {string} videoId   - ID video
+   * @returns {string} Public URL của thumbnail trên GCS
+   */
+  async uploadThumbnail(localPath, videoId) {
+    const destination = `thumbnails/${videoId}/thumbnail.jpg`;
+    logger.info(`Đang upload thumbnail lên GCS: ${destination}`);
+
+    await this.bucket.upload(localPath, {
+      destination,
+      metadata: {
+        contentType: 'image/jpeg',
+        cacheControl: 'public, max-age=86400', // Cache 24h
+      },
+    });
+
+    // Tạo public URL
+    const thumbnailUrl = `https://storage.googleapis.com/${config.gcp.bucketName}/${destination}`;
+    logger.info(`Upload thumbnail hoàn tất: ${thumbnailUrl}`);
+    return thumbnailUrl;
+  }
+
+  // ==========================================================================
   // HELPER
   // ==========================================================================
 

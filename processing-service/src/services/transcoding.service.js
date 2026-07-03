@@ -187,6 +187,40 @@ class TranscodingService {
   }
 
   // ==========================================================================
+  // TRÍCH XUẤT THUMBNAIL TỪ VIDEO (US-06)
+  // ==========================================================================
+
+  /**
+   * Dùng FFmpeg trích xuất 1 frame làm thumbnail
+   * @param {string} inputPath  - Đường dẫn file video gốc
+   * @param {string} outputPath - Đường dẫn file thumbnail output (.jpg)
+   * @returns {Promise<void>}
+   */
+  extractThumbnail(inputPath, outputPath) {
+    return new Promise((resolve, reject) => {
+      logger.info(`Trích xuất thumbnail: ${inputPath} → ${outputPath}`);
+
+      ffmpeg(inputPath)
+        .outputOptions([
+          '-ss', '00:00:03',       // Tại giây thứ 3 (tránh giây 0 thường đen)
+          '-vframes', '1',         // Chỉ lấy 1 frame
+          '-q:v', '2',             // Chất lượng JPEG (1=tốt nhất, 31=tệ nhất)
+          '-vf', 'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2',
+        ])
+        .output(outputPath)
+        .on('end', () => {
+          logger.info(`Thumbnail đã tạo: ${outputPath}`);
+          resolve();
+        })
+        .on('error', (err) => {
+          logger.error('Lỗi trích xuất thumbnail', { error: err.message });
+          reject(err);
+        })
+        .run();
+    });
+  }
+
+  // ==========================================================================
   // PRIVATE: TẠO MASTER PLAYLIST
   // ==========================================================================
 

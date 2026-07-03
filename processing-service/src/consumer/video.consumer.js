@@ -79,29 +79,45 @@ export async function initVideoConsumer() {
       // ====================================================================
       // BƯỚC 3: Upload HLS lên GCS (US-04)
       // ====================================================================
-      logger.info(`[3/5] Đang upload HLS lên GCS...`);
+      logger.info(`[3/6] Đang upload HLS lên GCS...`);
       const hlsUrl = await storageService.uploadHlsFolder(hlsOutputDir, videoId);
 
       // ====================================================================
-      // BƯỚC 4: Lấy duration bằng ffprobe (US-05)
+      // BƯỚC 4: Trích xuất thumbnail từ video (US-06)
       // ====================================================================
-      logger.info(`[4/5] Đang lấy thời lượng video bằng ffprobe...`);
+      let thumbnailUrl = null;
+      try {
+        logger.info(`[4/6] Đang trích xuất thumbnail...`);
+        const thumbnailPath = path.join(jobDir, 'thumbnail.jpg');
+        await transcodingService.extractThumbnail(rawFilePath, thumbnailPath);
+        thumbnailUrl = await storageService.uploadThumbnail(thumbnailPath, videoId);
+        logger.info(`[4/6] ✅ Thumbnail: ${thumbnailUrl}`);
+      } catch (thumbnailError) {
+        // Thumbnail lỗi KHÔNG được làm fail cả pipeline
+        logger.warn(`[4/6] ⚠️ Thumbnail lỗi (bỏ qua): ${thumbnailError.message}`);
+      }
+
+      // ====================================================================
+      // BƯỚC 5: Lấy duration bằng ffprobe (US-05)
+      // ====================================================================
+      logger.info(`[5/6] Đang lấy thời lượng video bằng ffprobe...`);
       const duration = await transcodingService.getVideoDuration(rawFilePath);
 
       // ====================================================================
-      // BƯỚC 5: Cập nhật Video Service + Gửi sự kiện (US-05)
+      // BƯỚC 6: Cập nhật Video Service + Gửi sự kiện (US-05)
       // ====================================================================
-      logger.info(`[5/5] Đang cập nhật trạng thái video...`);
+      logger.info(`[6/6] Đang cập nhật trạng thái video...`);
 
-      // 5a. Gọi Video Service API - cập nhật status = READY
+      // 6a. Gọi Video Service API - cập nhật status = READY
       await updateVideoService(videoId, {
         status: 'READY',
         hlsUrl,
+        thumbnailUrl,
         processedAt: new Date().toISOString(),
         duration,
       });
 
-      // 5b. Publish event đến queue video-processed → Notification Service
+      // 6b. Publish event đến queue video-processed → Notification Service
       await rabbitMQService.publish(OUTPUT_QUEUE, {
         event: 'video-processed',
         videoId,
