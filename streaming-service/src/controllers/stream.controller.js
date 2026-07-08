@@ -1,25 +1,25 @@
-// Controller phục vụ HLS files từ GCS
+
 const { getBucket } = require('../storage');
 
 const HLS_PREFIX = process.env.GCS_HLS_PREFIX || 'hls-outputs';
 
-// Map đuôi file → MIME type
+
 const MIME_TYPES = {
   'm3u8': 'application/vnd.apple.mpegurl',
   'ts': 'video/mp2t',
 };
 
-/**
- * Lấy file từ GCS và stream thẳng về client
- * @param {string} gcsPath - đường dẫn trong bucket
- * @param {string} mimeType - MIME type của file
- */
+
+
+
+
+
 async function streamFromGCS(req, res, gcsPath, mimeType) {
   const bucket = getBucket();
   const file = bucket.file(gcsPath);
 
   try {
-    // Kiểm tra file có tồn tại không (timeout 5s)
+
     const [exists] = await Promise.race([
       file.exists(),
       new Promise((_, reject) =>
@@ -31,15 +31,15 @@ async function streamFromGCS(req, res, gcsPath, mimeType) {
       return res.status(404).json({ success: false, message: `File không tồn tại: ${gcsPath}` });
     }
 
-    // Set headers
+
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Cache-Control', mimeType === MIME_TYPES.ts
-      ? 'public, max-age=31536000'  // .ts segment cache lâu
-      : 'public, max-age=5'         // .m3u8 playlist cache ngắn
+      ? 'public, max-age=31536000'  
+      : 'public, max-age=5'         
     );
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // Stream file về client
+
     const readStream = file.createReadStream();
 
     readStream.on('error', (err) => {
@@ -58,9 +58,9 @@ async function streamFromGCS(req, res, gcsPath, mimeType) {
   }
 }
 
-/**
- * GET /stream/:videoId/master.m3u8
- */
+
+
+
 async function getMasterPlaylist(req, res) {
   const { videoId } = req.params;
   const gcsPath = `${HLS_PREFIX}/${videoId}/master.m3u8`;
@@ -68,10 +68,10 @@ async function getMasterPlaylist(req, res) {
   await streamFromGCS(req, res, gcsPath, MIME_TYPES.m3u8);
 }
 
-/**
- * GET /stream/:videoId/:quality/playlist.m3u8
- * Ví dụ: /stream/video001/720p/playlist.m3u8
- */
+
+
+
+
 async function getQualityPlaylist(req, res) {
   const { videoId, quality } = req.params;
   const gcsPath = `${HLS_PREFIX}/${videoId}/${quality}/playlist.m3u8`;
@@ -79,14 +79,14 @@ async function getQualityPlaylist(req, res) {
   await streamFromGCS(req, res, gcsPath, MIME_TYPES.m3u8);
 }
 
-/**
- * GET /stream/:videoId/:quality/:segment
- * Ví dụ: /stream/video001/720p/seg000.ts
- */
+
+
+
+
 async function getSegment(req, res) {
   const { videoId, quality, segment } = req.params;
 
-  // Validate tên segment để tránh path traversal
+
   if (!/^[\w\-]+\.ts$/.test(segment)) {
     return res.status(400).json({ success: false, message: 'Tên segment không hợp lệ' });
   }
@@ -96,23 +96,23 @@ async function getSegment(req, res) {
   await streamFromGCS(req, res, gcsPath, MIME_TYPES.ts);
 }
 
-/**
- * GET /stream/:videoId/:file
- * Phục vụ cấu trúc phẳng do processing-service tạo ra
- * Ví dụ: /stream/video001/master.m3u8, /stream/video001/360p.m3u8, /stream/video001/360p_000.ts
- */
+
+
+
+
+
 async function getFileFlat(req, res) {
   const { videoId, file } = req.params;
 
-  // Validate tên file để tránh path traversal
+
   if (!/^[\w\-]+\.(m3u8|ts)$/.test(file)) {
     return res.status(400).json({ success: false, message: 'Tên file không hợp lệ' });
   }
 
   const gcsPath = `${HLS_PREFIX}/${videoId}/${file}`;
   console.log(`[stream] file flat → ${gcsPath}`);
-  
-  const isTs = file.endsWith('.ts');
+
+    const isTs = file.endsWith('.ts');
   const mimeType = isTs ? MIME_TYPES.ts : MIME_TYPES.m3u8;
 
   await streamFromGCS(req, res, gcsPath, mimeType);

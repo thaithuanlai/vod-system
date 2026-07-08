@@ -1,10 +1,10 @@
-// Controller cho API /notifications
+
 const { getDb } = require('../firebase');
 
-/**
- * GET /notifications/:userId
- * Trả danh sách notifications của user, mới nhất trước
- */
+
+
+
+
 async function getNotificationsByUser(req, res) {
   try {
     const { userId } = req.params;

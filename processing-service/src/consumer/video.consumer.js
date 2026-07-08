@@ -1,24 +1,24 @@
-// ============================================================================
-// VIDEO CONSUMER - Điều phối xử lý video từ hàng đợi RabbitMQ
-//
-// Luồng xử lý tổng thể (US-01 → US-05):
-//
-//   RabbitMQ [video-processing]
-//       ↓
-//   Download video từ GCS              (US-03 Bước 1)
-//       ↓
-//   FFmpeg Transcode → HLS 360/720/1080p  (US-03 Bước 2, 3)
-//       ↓
-//   Upload HLS lên GCS                 (US-04)
-//       ↓
-//   ffprobe lấy duration               (US-05)
-//       ↓
-//   Cập nhật Video Service (HTTP)       (US-05)
-//       ↓
-//   Publish event → video-processed     (US-05)
-//       ↓
-//   Dọn dẹp file tạm
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import fs from 'fs';
 import path from 'path';
@@ -28,9 +28,9 @@ import storageService from '../services/storage.service.js';
 import transcodingService from '../services/transcoding.service.js';
 import rabbitMQService from '../services/rabbitmq.service.js';
 
-/**
- * Khởi tạo consumer lắng nghe và xử lý video từ hàng đợi
- */
+
+
+
 export async function initVideoConsumer() {
   const INPUT_QUEUE = config.rabbitmq.queues.processing;
   const OUTPUT_QUEUE = config.rabbitmq.queues.processed;
@@ -38,16 +38,16 @@ export async function initVideoConsumer() {
   logger.info(`Khởi tạo video consumer cho queue: [${INPUT_QUEUE}]`);
 
   await rabbitMQService.subscribe(INPUT_QUEUE, async (message) => {
-    // --- Đọc thông tin từ message ---
+
     const { videoId, filename, fileName } = message;
-    const videoFilename = filename || fileName; // Hỗ trợ cả 2 format
+    const videoFilename = filename || fileName; 
 
     if (!videoId || !videoFilename) {
       logger.error('Message không hợp lệ - thiếu videoId hoặc filename', { message });
       return;
     }
 
-    // --- Chuẩn bị đường dẫn local ---
+
     const jobDir = path.join(config.tempDir, videoId);
     const rawFilePath = path.join(jobDir, videoFilename);
     const hlsOutputDir = path.join(jobDir, 'hls');
@@ -55,9 +55,9 @@ export async function initVideoConsumer() {
     try {
       logger.info(`══════════ BẮT ĐẦU XỬ LÝ VIDEO: ${videoId} ══════════`);
 
-      // ====================================================================
-      // BƯỚC 1: Download video từ GCS (US-03)
-      // ====================================================================
+
+
+
       if (!fs.existsSync(jobDir)) {
         fs.mkdirSync(jobDir, { recursive: true });
       }
@@ -65,9 +65,9 @@ export async function initVideoConsumer() {
       logger.info(`[1/5] Đang tải video từ GCS: ${videoFilename}`);
       await storageService.downloadRawVideo(videoFilename, rawFilePath);
 
-      // ====================================================================
-      // BƯỚC 2: Transcode sang HLS đa chất lượng (US-03)
-      // ====================================================================
+
+
+
       logger.info(`[2/5] Đang transcode video...`);
 
       await transcodingService.transcodeToHls(rawFilePath, hlsOutputDir,
@@ -76,15 +76,15 @@ export async function initVideoConsumer() {
         }
       );
 
-      // ====================================================================
-      // BƯỚC 3: Upload HLS lên GCS (US-04)
-      // ====================================================================
+
+
+
       logger.info(`[3/6] Đang upload HLS lên GCS...`);
       const hlsUrl = await storageService.uploadHlsFolder(hlsOutputDir, videoId);
 
-      // ====================================================================
-      // BƯỚC 4: Trích xuất thumbnail từ video (US-06)
-      // ====================================================================
+
+
+
       let thumbnailUrl = null;
       try {
         logger.info(`[4/6] Đang trích xuất thumbnail...`);
@@ -93,22 +93,22 @@ export async function initVideoConsumer() {
         thumbnailUrl = await storageService.uploadThumbnail(thumbnailPath, videoId);
         logger.info(`[4/6] ✅ Thumbnail: ${thumbnailUrl}`);
       } catch (thumbnailError) {
-        // Thumbnail lỗi KHÔNG được làm fail cả pipeline
+
         logger.warn(`[4/6] ⚠️ Thumbnail lỗi (bỏ qua): ${thumbnailError.message}`);
       }
 
-      // ====================================================================
-      // BƯỚC 5: Lấy duration bằng ffprobe (US-05)
-      // ====================================================================
+
+
+
       logger.info(`[5/6] Đang lấy thời lượng video bằng ffprobe...`);
       const duration = await transcodingService.getVideoDuration(rawFilePath);
 
-      // ====================================================================
-      // BƯỚC 6: Cập nhật Video Service + Gửi sự kiện (US-05)
-      // ====================================================================
+
+
+
       logger.info(`[6/6] Đang cập nhật trạng thái video...`);
 
-      // 6a. Gọi Video Service API - cập nhật status = READY
+
       await updateVideoService(videoId, {
         status: 'READY',
         hlsUrl,
@@ -117,7 +117,7 @@ export async function initVideoConsumer() {
         duration,
       });
 
-      // 6b. Publish event đến queue video-processed → Notification Service
+
       await rabbitMQService.publish(OUTPUT_QUEUE, {
         event: 'video-processed',
         videoId,
@@ -128,35 +128,35 @@ export async function initVideoConsumer() {
     } catch (error) {
       logger.error(`Lỗi xử lý video ${videoId}`, { error: error.message });
 
-      // Cập nhật Video Service - status = ERROR (US-05)
+
       await updateVideoService(videoId, {
         status: 'ERROR',
         error: error.message,
       });
 
-      // Throw lại để RabbitMQ service thực hiện NACK + requeue (US-02)
+
       throw error;
 
     } finally {
-      // Luôn dọn dẹp file tạm (US-04)
+
       cleanupTempDir(jobDir);
     }
   });
 }
 
-// ============================================================================
-// CẬP NHẬT VIDEO SERVICE QUA HTTP (US-05)
-// ============================================================================
 
-/**
- * Gọi API Video Service để cập nhật trạng thái video
- *
- * Thành công: { status: "READY", hlsUrl, processedAt, duration }
- * Thất bại:   { status: "ERROR", error: "..." }
- *
- * @param {string} videoId - ID video
- * @param {object} data    - Dữ liệu cập nhật
- */
+
+
+
+
+
+
+
+
+
+
+
+
 async function updateVideoService(videoId, data) {
   const url = `${config.videoServiceUrl}/videos/${videoId}`;
 
@@ -175,19 +175,19 @@ async function updateVideoService(videoId, data) {
       logger.info(`Cập nhật Video Service thành công: ${data.status}`, { videoId });
     }
   } catch (err) {
-    // Chỉ log warning, không throw → không ảnh hưởng luồng chính
+
     logger.warn(`Không thể gọi Video Service`, { videoId, error: err.message });
   }
 }
 
-// ============================================================================
-// DỌN DẸP FILE TẠM (US-04)
-// ============================================================================
 
-/**
- * Xóa thư mục tạm sau khi xử lý xong
- * @param {string} dirPath - Đường dẫn thư mục cần xóa
- */
+
+
+
+
+
+
+
 function cleanupTempDir(dirPath) {
   if (!fs.existsSync(dirPath)) return;
 

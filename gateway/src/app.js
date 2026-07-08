@@ -12,10 +12,10 @@ const healthRouter                = require('./routes/health');
 
 const app = express();
 
-// ─── 1. Security Headers ────────────────────────────────────────
+
 app.use(helmet());
 
-// ─── 2. CORS ────────────────────────────────────────────────────
+
 app.use(cors({
   origin:         config.corsOrigins,
   methods:        ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -23,14 +23,14 @@ app.use(cors({
   credentials:    true,
 }));
 
-// ─── 3. Request Logging ─────────────────────────────────────────
+
 app.use(logger);
 
-// ─── 4. Body Parser ─────────────────────────────────────────────
-// ĐÃ XÓA: API Gateway KHÔNG NÊN parse body vì nó sẽ consume stream của proxy.
-// Để các downstream microservices tự parse body.
 
-// ─── 5. Rate Limiting ───────────────────────────────────────────
+
+
+
+
 const limiter = rateLimit({
   windowMs:       config.rateLimit.windowMs,
   max:            config.rateLimit.max,
@@ -43,18 +43,18 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// ─── 6. JWT Authentication ──────────────────────────────────────
+
 app.use(authMiddleware);
 
-// ─── 7. Internal Routes (không proxy) ───────────────────────────
+
 app.get('/health', (req, res) => res.redirect('/api/health'));
 app.use('/api/health', healthRouter);
 
-// ─── 8. Proxy Routes → Microservices ────────────────────────────
-// Đăng ký tất cả proxy routes từ config/routes.js
+
+
 registerProxyRoutes(app);
 
-// ─── 9. 404 Handler ─────────────────────────────────────────────
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -64,7 +64,7 @@ app.use((req, res) => {
   });
 });
 
-// ─── 10. Error Handler ──────────────────────────────────────────
+
 app.use(errorHandler);
 
 module.exports = app;

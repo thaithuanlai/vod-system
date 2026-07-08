@@ -3,14 +3,14 @@ import { API_URL } from '../config';
 
 const api = axios.create({ baseURL: API_URL });
 
-// Tự động gắn JWT token vào mọi request
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Tự động xử lý 401 → redirect login
+
 api.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -23,20 +23,20 @@ api.interceptors.response.use(
   }
 );
 
-// ── Auth ─────────────────────────────────────────────────────
+
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login:    (data) => api.post('/auth/login', data),
 };
 
-// ── Videos ───────────────────────────────────────────────────
+
 export const videoAPI = {
   getAll:   (params) => api.get('/videos', { params }),
   getById:  (id)     => api.get(`/videos/${id}`),
   delete:   (id)     => api.delete(`/videos/${id}`),
 };
 
-// ── Upload (XHR for progress) ────────────────────────────────
+
 export const uploadVideo = (file, metadata, onProgress) => {
   return new Promise((resolve, reject) => {
     const formData = new FormData();

@@ -9,11 +9,11 @@ const migrate = async () => {
 
     await client.query('BEGIN');
 
-    // ─── Extension UUID ───────────────────────────────────────────
+
     await client.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
     console.log('  ✅ Extension uuid-ossp sẵn sàng');
 
-    // ─── Bảng USERS ──────────────────────────────────────────────
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id            UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -30,7 +30,7 @@ const migrate = async () => {
     `);
     console.log('  ✅ Bảng users đã tạo (hoặc đã tồn tại)');
 
-    // ─── Bảng REFRESH_TOKENS ─────────────────────────────────────
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id          UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -43,7 +43,7 @@ const migrate = async () => {
     `);
     console.log('  ✅ Bảng refresh_tokens đã tạo (hoặc đã tồn tại)');
 
-    // ─── Indexes ──────────────────────────────────────────────────
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_users_email
         ON users(email);
@@ -60,7 +60,7 @@ const migrate = async () => {
     `);
     console.log('  ✅ Indexes đã tạo');
 
-    // ─── Trigger: tự động cập nhật updated_at ─────────────────────
+
     await client.query(`
       CREATE OR REPLACE FUNCTION update_updated_at_column()
       RETURNS TRIGGER AS $$

@@ -2,12 +2,12 @@ const { createProxyMiddleware, fixRequestBody } = require('http-proxy-middleware
 const timeoutMiddleware = require('./timeoutMiddleware');
 const ROUTES = require('../config/routes');
 
-/**
- * Tạo error handler cho proxy
- * Xử lý khi service đích không chạy hoặc từ chối kết nối
- */
+
+
+
+
 const createProxyErrorHandler = (serviceName) => (err, req, res) => {
-  // Tránh gửi response khi đã gửi rồi
+
   if (res.headersSent) return;
 
   const isConnRefused = err.code === 'ECONNREFUSED';
@@ -17,7 +17,7 @@ const createProxyErrorHandler = (serviceName) => (err, req, res) => {
     `[Proxy] ❌ ${serviceName} — ${err.code || err.message} — ${req.method} ${req.path}`
   );
 
-  // Phân biệt lỗi để trả thông báo phù hợp
+
   if (isConnRefused) {
     return res.status(503).json({
       success: false,
@@ -47,19 +47,19 @@ const createProxyErrorHandler = (serviceName) => (err, req, res) => {
   });
 };
 
-/**
- * Tạo proxy middleware cho một service
- * @param {object} route - Route config từ routes.js
- * @returns {Function[]} Mảng middlewares: [timeout, proxy]
- */
+
+
+
+
+
 const createServiceProxy = (route) => {
   const serviceName = route.description.split('—')[0].trim();
 
   const proxy = createProxyMiddleware({
     target:       route.target,
-    changeOrigin: true,    // Đổi Host header thành target host
-    pathRewrite:  (path, req) => req.originalUrl, // Không strip prefix
-    // Ghi log mỗi lần proxy request
+    changeOrigin: true,    
+    pathRewrite:  (path, req) => req.originalUrl, 
+
     on: {
       proxyReq: (proxyReq, req, res) => {
         console.log(
@@ -75,25 +75,25 @@ const createServiceProxy = (route) => {
     },
   });
 
-  // Trả về mảng: [timeoutMiddleware, proxyMiddleware]
-  // timeout phải chạy TRƯỚC proxy để có thể cancel kịp thời
+
+
   return [timeoutMiddleware(route.timeout), proxy];
 };
 
-/**
- * Đăng ký tất cả routes vào Express app
- * @param {Express} app - Express application instance
- */
+
+
+
+
 const registerProxyRoutes = (app) => {
   console.log('\n[Gateway] Đăng ký proxy routes:');
 
   ROUTES.forEach((route) => {
     const middlewares = createServiceProxy(route);
 
-    // app.use(prefix, ...middlewares)
+
     app.use(route.prefix, ...middlewares);
 
-    // Log routing table khi khởi động
+
     console.log(
       `  ${route.protected ? '🔒' : '🌐'} ${route.prefix.padEnd(12)} → ${route.target.padEnd(30)} (timeout: ${route.timeout / 1000}s)`
     );

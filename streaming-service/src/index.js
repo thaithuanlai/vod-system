@@ -8,7 +8,7 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 const PORT = process.env.PORT || 3005;
 
-// CORS cho phép player web gọi được
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'HEAD', 'OPTIONS'],
@@ -16,19 +16,19 @@ app.use(cors({
   exposedHeaders: ['Content-Length', 'Content-Range', 'Content-Type'],
 }));
 
-// Khởi tạo GCS
+
 initStorage();
 console.log('✅ GCS Storage initialized, bucket:', process.env.GCS_BUCKET_NAME);
 
-// Health check
+
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'Streaming Service is running', port: PORT });
 });
 
-// Stream routes
+
 app.use('/stream', streamRoutes);
 
-// Error handler
+
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {

@@ -1,12 +1,12 @@
-// Service layer gọi API backend qua Gateway
-// Sử dụng axios instance từ api.js (đã có JWT interceptor)
+
+
 import api from './api';
 
-/**
- * Lấy danh sách video theo userId
- * @param {string} userId
- * @param {number} limit
- */
+
+
+
+
+
 export async function fetchVideos(userId, limit = 20) {
   const params = {};
   if (userId) params.userId = userId;
@@ -17,21 +17,21 @@ export async function fetchVideos(userId, limit = 20) {
   return res.data.data;
 }
 
-/**
- * Lấy chi tiết một video
- * @param {string} videoId
- */
+
+
+
+
 export async function fetchVideoById(videoId) {
   const res = await api.get(`/videos/${videoId}`);
   if (!res.data.success) throw new Error(res.data.message);
   return res.data.data;
 }
 
-/**
- * Upload video file qua Gateway
- * @param {File} file - File object từ input
- * @param {function} onProgress - Callback tiến độ: (percent)
- */
+
+
+
+
+
 export async function uploadVideo(file, onProgress) {
   const formData = new FormData();
   formData.append('video', file);
@@ -48,10 +48,10 @@ export async function uploadVideo(file, onProgress) {
   return res.data;
 }
 
-/**
- * Xóa video
- * @param {string} videoId
- */
+
+
+
+
 export async function deleteVideo(videoId) {
   const res = await api.delete(`/videos/${videoId}`);
   return res.data;

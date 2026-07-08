@@ -1,17 +1,17 @@
-// Kết nối RabbitMQ với tự động reconnect
+
 const amqp = require('amqplib');
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-const RETRY_DELAY_MS = 5000; // chờ 5s rồi retry
+const RETRY_DELAY_MS = 5000; 
 const MAX_RETRIES = 20;
 
 let connection = null;
 let channel = null;
 
-/**
- * Kết nối và tạo channel RabbitMQ.
- * Tự động retry nếu không kết nối được.
- */
+
+
+
+
 async function connectRabbitMQ(retries = 0) {
   try {
     console.log(`[RabbitMQ] Đang kết nối tới ${RABBITMQ_URL}...`);
@@ -19,7 +19,7 @@ async function connectRabbitMQ(retries = 0) {
     channel = await connection.createChannel();
     console.log('[RabbitMQ] ✅ Kết nối thành công');
 
-    // Xử lý sự kiện mất kết nối
+
     connection.on('error', (err) => {
       console.error('[RabbitMQ] Connection error:', err.message);
     });

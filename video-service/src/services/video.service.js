@@ -1,12 +1,12 @@
-// Tầng service - tương tác trực tiếp với Firestore
+
 const { getDb } = require('../firebase');
 const admin = require('firebase-admin');
 
 const COLLECTION = 'videos';
 
-/**
- * Lấy danh sách video (có filter userId, pagination limit)
- */
+
+
+
 async function listVideos({ userId, limit = 10 }) {
   const db = getDb();
   let query = db.collection(COLLECTION).orderBy('createdAt', 'desc');
@@ -21,9 +21,9 @@ async function listVideos({ userId, limit = 10 }) {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Lấy một video theo ID
- */
+
+
+
 async function getVideoById(videoId) {
   const db = getDb();
   const doc = await db.collection(COLLECTION).doc(videoId).get();
@@ -31,9 +31,9 @@ async function getVideoById(videoId) {
   return { id: doc.id, ...doc.data() };
 }
 
-/**
- * Tạo metadata video mới (gọi sau khi upload xong)
- */
+
+
+
 async function createVideo(data) {
   const db = getDb();
   const now = admin.firestore.FieldValue.serverTimestamp();
@@ -53,7 +53,7 @@ async function createVideo(data) {
     processedAt: null,
   };
 
-  // Dùng videoId làm document ID nếu có, không thì để Firestore tự tạo
+
   let ref;
   if (data.videoId) {
     ref = db.collection(COLLECTION).doc(data.videoId);
@@ -66,14 +66,14 @@ async function createVideo(data) {
   return { id: created.id, ...created.data() };
 }
 
-/**
- * Cập nhật metadata video (status, hlsUrl, gcsPath, v.v.)
- */
+
+
+
 async function updateVideo(videoId, data) {
   const db = getDb();
   const now = admin.firestore.FieldValue.serverTimestamp();
 
-  // Chỉ cho phép cập nhật các trường này
+
   const allowedFields = ['status', 'hlsUrl', 'gcsPath', 'duration', 'errorMessage', 'processedAt', 'thumbnailUrl'];
   const updateData = { updatedAt: now };
 
@@ -88,9 +88,9 @@ async function updateVideo(videoId, data) {
   return { id: updated.id, ...updated.data() };
 }
 
-/**
- * Xóa video theo ID
- */
+
+
+
 async function deleteVideo(videoId) {
   const db = getDb();
   await db.collection(COLLECTION).doc(videoId).delete();

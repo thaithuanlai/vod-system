@@ -5,16 +5,16 @@ import { createInitialMetadata } from '../services/video-metadata.service.js';
 
 export { initRabbitMQ };
 
-/**
- * Controller xử lý luồng upload video hoàn chỉnh:
- * T15 – Validate & nhận file qua multer
- * T16 – Upload buffer lên Google Cloud Storage
- * T17 – Publish message vào RabbitMQ
- * T18 – Tạo metadata ban đầu trên Video Service
- */
+
+
+
+
+
+
+
 export const uploadVideo = (req, res) => {
     uploadMiddleware(req, res, async (err) => {
-        // --- ĐOẠN XỬ LÝ LỖI VALIDATION PHÁT SINH TỪ T15 ---
+
         if (err) {
             if (err.code === 'LIMIT_FILE_SIZE') {
                 return res.status(413).json({ success: false, message: 'Payload Too Large: File vượt quá 500MB.' });
@@ -29,7 +29,7 @@ export const uploadVideo = (req, res) => {
         }
 
         try {
-            // Lấy userId từ header do API Gateway forward sau khi verify JWT
+
             const userId = req.headers['x-user-id'];
             if (!userId) {
                 return res.status(401).json({ success: false, message: 'Unauthorized: Thiếu thông tin user.' });
@@ -37,28 +37,28 @@ export const uploadVideo = (req, res) => {
 
             console.log(`[Upload Flow] Bắt đầu xử lý file: ${req.file.originalname}`);
 
-            // BƯỚC 1: Triển khai T16 - Đẩy dữ liệu lên Google Cloud Storage
+
             const gcsResult = await uploadBufferToGCS(req.file);
 
-            // BƯỚC 2: Triển khai T18 - Đăng ký bản ghi Metadata ban đầu sang Video Service trước
+
             const titleDefault = req.file.originalname.substring(0, req.file.originalname.lastIndexOf('.')) || req.file.originalname;
 
             const metadataPayload = {
                 userId,
                 title: titleDefault,
-                status: 'UPLOADING', // Trạng thái ban đầu bắt buộc theo đặc tả hệ thống
+                status: 'UPLOADING', 
                 gcsPath: gcsResult.gcsPath,
                 createdAt: new Date().toISOString()
             };
 
-            // Đồng bộ định danh videoId được sinh từ cơ sở dữ liệu hệ thống
+
             const videoId = await createInitialMetadata(metadataPayload);
 
-            // BƯỚC 3: Triển khai T17 - Bắn message thông báo tác vụ vào RabbitMQ Broker
+
             const mqPayload = {
                 videoId,
                 gcsPath: gcsResult.gcsPath,
-                filename: gcsResult.gcsPath.split('/').pop(), // Lấy tên file gốc uuid.mp4
+                filename: gcsResult.gcsPath.split('/').pop(), 
                 originalName: gcsResult.originalName,
                 userId,
                 uploadedAt: metadataPayload.createdAt
@@ -66,7 +66,7 @@ export const uploadVideo = (req, res) => {
 
             await publishToQueue(mqPayload);
 
-            // BƯỚC 4: Phản hồi thành công về phía Client (Đảm bảo tiêu chí Non-blocking)
+
             return res.status(201).json({
                 success: true,
                 message: 'Video đã được tải lên thành công và đưa vào hàng đợi xử lý.',

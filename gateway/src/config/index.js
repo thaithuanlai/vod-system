@@ -16,7 +16,7 @@ const config = {
   },
 
   corsOrigins: process.env.CORS_ORIGINS === '*'
-    ? true // true tells cors to reflect the exact request origin, needed when credentials=true
+    ? true 
     : process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(',')
       : ['http://localhost:5173', 'http://localhost:3000'],

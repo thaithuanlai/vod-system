@@ -1,13 +1,13 @@
-// ============================================================================
-// LOGGER - Ghi log có cấu trúc bằng Winston
-// Format: [timestamp] [level] [service]: message
-// ============================================================================
+
+
+
+
 
 import winston from 'winston';
 
 const { combine, timestamp, colorize, printf, errors, json } = winston.format;
 
-// Format hiển thị trên console
+
 const consoleFormat = combine(
   colorize(),
   printf(({ timestamp, level, message, service, ...meta }) => {
@@ -16,7 +16,7 @@ const consoleFormat = combine(
   })
 );
 
-// Tạo logger instance
+
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: combine(

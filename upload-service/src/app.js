@@ -10,7 +10,7 @@ app.get('/health', (req, res) => {
     res.json({ service: 'upload-service', status: 'healthy', port: PORT });
 });
 
-// Khởi tạo hàng đợi RabbitMQ khi ứng dụng khởi chạy
+
 initRabbitMQ();
 
 app.post('/upload', uploadVideo);

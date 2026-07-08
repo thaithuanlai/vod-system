@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const config = require('../config');
 
-// GET /health
-// Dùng để kiểm tra service còn sống không
-// Docker, Cloud Run, Load Balancer đều ping endpoint này
+
+
+
 router.get('/', (req, res) => {
   res.status(200).json({
     success: true,

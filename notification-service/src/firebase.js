@@ -1,4 +1,4 @@
-// Khởi tạo Firebase Admin SDK
+
 const admin = require('firebase-admin');
 
 let db;

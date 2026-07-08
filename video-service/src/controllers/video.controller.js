@@ -1,16 +1,16 @@
-// Controller - nhận request, gọi service, trả response
+
 const videoService = require('../services/video.service');
 
-// Helper: trả response thống nhất
+
 const ok = (res, data, message = 'OK') =>
   res.json({ success: true, message, data });
 
 const fail = (res, message, status = 500) =>
   res.status(status).json({ success: false, message });
 
-/**
- * GET /videos?userId=...&limit=...
- */
+
+
+
 async function listVideos(req, res) {
   try {
     const { userId, limit } = req.query;
@@ -22,9 +22,9 @@ async function listVideos(req, res) {
   }
 }
 
-/**
- * GET /videos/:id
- */
+
+
+
 async function getVideo(req, res) {
   try {
     const video = await videoService.getVideoById(req.params.id);
@@ -36,9 +36,9 @@ async function getVideo(req, res) {
   }
 }
 
-/**
- * POST /videos
- */
+
+
+
 async function createVideo(req, res) {
   try {
     const video = await videoService.createVideo(req.body);
@@ -49,9 +49,9 @@ async function createVideo(req, res) {
   }
 }
 
-/**
- * PATCH /videos/:id
- */
+
+
+
 async function updateVideo(req, res) {
   try {
     const video = await videoService.updateVideo(req.params.id, req.body);
@@ -62,9 +62,9 @@ async function updateVideo(req, res) {
   }
 }
 
-/**
- * DELETE /videos/:id
- */
+
+
+
 async function deleteVideo(req, res) {
   try {
     await videoService.deleteVideo(req.params.id);

@@ -1,17 +1,17 @@
-/**
- * Date Helper — Xử lý mọi format ngày tháng từ Firestore
- * Firestore có thể trả về:
- *   - Timestamp object: { seconds: 1234567890, nanoseconds: 0 }
- *   - { _seconds, _nanoseconds }
- *   - ISO string: "2025-06-01T10:00:00.000Z"
- *   - Unix timestamp (number): 1234567890
- *   - null / undefined
- */
+
+
+
+
+
+
+
+
+
 
 export const parseDate = (value) => {
   if (!value) return null;
 
-  // Firestore Timestamp object (cả 2 dạng)
+
   if (value?.seconds !== undefined) {
     return new Date(value.seconds * 1000);
   }
@@ -19,13 +19,13 @@ export const parseDate = (value) => {
     return new Date(value._seconds * 1000);
   }
 
-  // Nếu là number (unix timestamp)
+
   if (typeof value === 'number') {
-    // Nếu < 10 tỷ thì là seconds, > thì là milliseconds
+
     return new Date(value < 1e12 ? value * 1000 : value);
   }
 
-  // ISO string hoặc bất kỳ string nào
+
   const date = new Date(value);
   if (isNaN(date.getTime())) return null;
   return date;
@@ -49,7 +49,7 @@ export const formatRelativeTime = (value) => {
   if (!date) return '';
 
   const now = new Date();
-  const diff = now - date; // milliseconds
+  const diff = now - date; 
   if (diff < 0) return 'Vừa xong';
 
   const minutes = Math.floor(diff / 60000);

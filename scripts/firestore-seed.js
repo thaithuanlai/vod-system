@@ -1,19 +1,19 @@
-/**
- * T07 - Firestore Setup Script
- * Tạo sample documents cho collection "videos" và "notifications"
- *
- * Cách chạy:
- *   node scripts/firestore-seed.js
- *
- * Yêu cầu:
- *   - GOOGLE_APPLICATION_CREDENTIALS trỏ đến service-account.json
- *   - FIRESTORE_PROJECT_ID là GCP project của bạn
- */
+
+
+
+
+
+
+
+
+
+
+
 
 require('dotenv').config();
 const admin = require('firebase-admin');
 
-// Khởi tạo Admin SDK
+
 const credential = process.env.GOOGLE_APPLICATION_CREDENTIALS
   ? admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS))
   : admin.credential.applicationDefault();
@@ -26,7 +26,7 @@ admin.initializeApp({
 const db = admin.firestore();
 const now = admin.firestore.FieldValue.serverTimestamp();
 
-// ---- Sample data ----
+
 
 const sampleVideo = {
   videoId: 'video001',
@@ -52,16 +52,16 @@ const sampleNotification = {
   timestamp: now,
 };
 
-// ---- Seed ----
+
 
 async function seed() {
   console.log('🌱 Bắt đầu seed Firestore...\n');
 
-  // Collection: videos
+
   await db.collection('videos').doc('video001').set(sampleVideo);
   console.log('✅ Đã tạo document videos/video001');
 
-  // Collection: notifications
+
   const notifRef = await db.collection('notifications').add(sampleNotification);
   console.log('✅ Đã tạo document notifications/' + notifRef.id);
 

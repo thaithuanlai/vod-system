@@ -1,13 +1,13 @@
-/**
- * Timeout Middleware
- *
- * Tự động hủy request nếu service downstream không phản hồi
- * trong khoảng thời gian cho phép.
- *
- * @param {number} ms - Timeout tính bằng milliseconds
- */
+
+
+
+
+
+
+
+
 const timeoutMiddleware = (ms) => (req, res, next) => {
-  // Đặt timer — nếu hết giờ mà chưa có response → trả 503
+
   const timer = setTimeout(() => {
     if (!res.headersSent) {
       console.error(
@@ -23,7 +23,7 @@ const timeoutMiddleware = (ms) => (req, res, next) => {
     }
   }, ms);
 
-  // Hủy timer khi response đã được gửi (dù thành công hay lỗi)
+
   res.on('finish',  () => clearTimeout(timer));
   res.on('close',   () => clearTimeout(timer));
 
