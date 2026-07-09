@@ -46,8 +46,9 @@ export const uploadVideo = (req, res) => {
             const metadataPayload = {
                 userId,
                 title: titleDefault,
-                status: 'UPLOADING', 
+                status: 'UPLOADING',
                 gcsPath: gcsResult.gcsPath,
+                sizeBytes: req.file.size,
                 createdAt: new Date().toISOString()
             };
 

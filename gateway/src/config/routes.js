@@ -49,6 +49,16 @@ const ROUTES = [
 
 
   {
+    prefix:      '/users/me',
+    target:      config.services.video,
+    protected:   true,
+    rewrite:     false,
+    timeout:     15000,
+    description: 'Video Service — Watch Progress, Favorites',
+  },
+
+
+  {
     prefix:      '/stream',
     target:      config.services.streaming,
     protected:   false,
@@ -65,6 +75,36 @@ const ROUTES = [
     rewrite:     false,
     timeout:     10000,
     description: 'Notification Service — Events & Logs',
+  },
+
+
+  {
+    prefix:      '/admin/users',
+    target:      config.services.user,
+    protected:   true,
+    rewrite:     false,
+    timeout:     15000,
+    description: 'User Service — Admin User Management',
+  },
+
+
+  {
+    prefix:      '/admin/videos',
+    target:      config.services.video,
+    protected:   true,
+    rewrite:     false,
+    timeout:     15000,
+    description: 'Video Service — Admin Video Management',
+  },
+
+
+  {
+    prefix:      '/admin/stats',
+    target:      config.services.video,
+    protected:   true,
+    rewrite:     false,
+    timeout:     15000,
+    description: 'Video Service — Admin Stats',
   },
 ];
 

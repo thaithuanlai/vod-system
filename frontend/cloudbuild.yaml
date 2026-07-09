@@ -1,15 +1,11 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args:
-  - 'build'
-  - '--build-arg'
-  - 'VITE_API_GATEWAY_URL=$_GATEWAY_URL'
-  - '--build-arg'
-  - 'VITE_STREAMING_SERVICE_URL=$_STREAMING_URL'
-  - '-t'
-  - '$_IMAGE_NAME'
-  - '.'
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '$_IMAGE_NAME']
+  args: [
+    'build',
+    '-t', 'asia-southeast1-docker.pkg.dev/vod-system-2025/vod-docker-repo/frontend:latest',
+    '--build-arg', 'VITE_API_GATEWAY_URL=https://gateway-491378480401.asia-southeast1.run.app',
+    '--build-arg', 'VITE_STREAMING_SERVICE_URL=https://streaming-service-491378480401.asia-southeast1.run.app',
+    '.'
+  ]
 images:
-- '$_IMAGE_NAME'
+- 'asia-southeast1-docker.pkg.dev/vod-system-2025/vod-docker-repo/frontend:latest'

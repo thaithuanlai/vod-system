@@ -11,6 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
+const adminRoutes = require('./routes/admin');
+app.use('/admin/users', adminRoutes);
+
 
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', service: 'user-service', timestamp: new Date().toISOString() });

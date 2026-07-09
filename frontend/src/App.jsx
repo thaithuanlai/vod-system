@@ -7,8 +7,11 @@ import Layout from './components/Layout/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Videos from './pages/Videos';
+import Discover from './pages/Discover';
 import VideoDetail from './pages/VideoDetail';
 import Upload from './pages/Upload';
+import Favorites from './pages/Favorites';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Component bảo vệ route
 const ProtectedRoute = ({ children }) => {
@@ -24,12 +27,26 @@ const ProtectedRoute = ({ children }) => {
 // Route chỉ dành cho khách (chưa login)
 const GuestRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
+
   if (isAuthenticated) {
     return <Navigate to="/videos" replace />;
   }
-  
+
   return children;
+};
+
+// Route chỉ dành cho admin
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'admin') {
+    return <Navigate to="/videos" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
 };
 
 export default function App() {
@@ -60,6 +77,12 @@ export default function App() {
                 </ProtectedRoute>
               } />
 
+              <Route path="/discover" element={
+                <ProtectedRoute>
+                  <Discover />
+                </ProtectedRoute>
+              } />
+
               <Route path="/videos/:id" element={
                 <ProtectedRoute>
                   <VideoDetail />
@@ -70,6 +93,18 @@ export default function App() {
                 <ProtectedRoute>
                   <Upload />
                 </ProtectedRoute>
+              } />
+
+              <Route path="/favorites" element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
               } />
 
               {/* 404 Fallback */}

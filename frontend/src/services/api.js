@@ -34,6 +34,34 @@ export const videoAPI = {
   getAll:   (params) => api.get('/videos', { params }),
   getById:  (id)     => api.get(`/videos/${id}`),
   delete:   (id)     => api.delete(`/videos/${id}`),
+
+  recordView:     (id)              => api.post(`/videos/${id}/view`),
+  getRelated:     (id, limit)       => api.get(`/videos/${id}/related`, { params: { limit } }),
+
+  toggleLike:     (id)              => api.post(`/videos/${id}/like`),
+  getLikeStatus:  (id)              => api.get(`/videos/${id}/like-status`),
+
+  getComments:    (id, params)      => api.get(`/videos/${id}/comments`, { params }),
+  postComment:    (id, data)        => api.post(`/videos/${id}/comments`, data),
+  deleteComment:  (id, commentId)   => api.delete(`/videos/${id}/comments/${commentId}`),
+
+  rateVideo:      (id, stars)       => api.post(`/videos/${id}/rating`, { stars }),
+
+  updateProgress: (id, data)        => api.put(`/users/me/progress/${id}`, data),
+  getProgress:    (id)              => api.get(`/users/me/progress/${id}`),
+  getContinueWatching: (limit)      => api.get('/users/me/continue-watching', { params: { limit } }),
+
+  toggleFavorite:     (id) => api.post(`/users/me/favorites/${id}`),
+  getFavoriteStatus:  (id) => api.get(`/users/me/favorites/${id}/status`),
+  getFavorites:       ()   => api.get('/users/me/favorites'),
+};
+
+export const adminAPI = {
+  getUsers:    ()            => api.get('/admin/users'),
+  patchUser:   (id, data)    => api.patch(`/admin/users/${id}`, data),
+  getVideos:   (params)      => api.get('/admin/videos', { params }),
+  deleteVideo: (id)          => api.delete(`/admin/videos/${id}`),
+  getStats:    ()            => api.get('/admin/stats'),
 };
 
 

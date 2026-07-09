@@ -55,6 +55,16 @@ export const cleanVideoTitle = (title, maxLength = 50) => {
 
 
 
+export const formatCount = (count = 0) => {
+  const n = Number(count) || 0;
+  if (n < 1000) return String(n);
+  if (n < 1000000) return `${(n / 1000).toFixed(n % 1000 >= 100 ? 1 : 0)}K`;
+  return `${(n / 1000000).toFixed(n % 1000000 >= 100000 ? 1 : 0)}M`;
+};
+
+
+
+
 export const getTitleInitials = (title = '') => {
   const clean = cleanVideoTitle(title);
   if (clean === 'Video không có tiêu đề') return '▶';

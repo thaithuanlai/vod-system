@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const { initFirestore } = require('./firebase');
 const videoRoutes = require('./routes/video.routes');
+const activityRoutes = require('./routes/activity.routes');
+const adminVideoRoutes = require('./routes/admin.routes');
+const statsRoutes = require('./routes/stats.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
@@ -26,6 +29,9 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/videos', videoRoutes);
+app.use('/users/me', activityRoutes);
+app.use('/admin/videos', adminVideoRoutes);
+app.use('/admin/stats', statsRoutes);
 
 
 app.use(errorMiddleware);

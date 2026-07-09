@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { cleanVideoTitle } from '../utils/videoHelper';
 import VideoCard from '../components/Video/VideoCard';
 import HeroBanner from '../components/Video/HeroBanner';
+import ContinueWatchingRow from '../components/Video/ContinueWatchingRow';
 import SkeletonCard from '../components/UI/SkeletonCard';
 import Button from '../components/UI/Button';
 
@@ -74,6 +75,8 @@ export default function Videos() {
       {!loading && featuredVideo && filter === 'ALL' && !searchQuery && (
         <HeroBanner video={featuredVideo} />
       )}
+
+      {!loading && filter === 'ALL' && !searchQuery && <ContinueWatchingRow />}
 
       {/* Section Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-16 mt-12" style={{ marginBottom: '80px' }}>

@@ -23,8 +23,11 @@ export default function Navbar() {
   if (!isAuthenticated) return null;
 
   const navLinks = [
-    { to: '/videos', label: 'Trang chủ' },
+    { to: '/videos', label: 'Video của bạn' },
+    { to: '/discover', label: 'Khám phá' },
+    { to: '/favorites', label: 'Yêu thích' },
     { to: '/upload', label: 'Tải lên' },
+    ...(user?.role === 'admin' ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
 
   return (

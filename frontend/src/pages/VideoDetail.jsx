@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { videoAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -6,6 +6,11 @@ import { formatDate, formatRelativeTime, formatDuration } from '../utils/dateHel
 import { cleanVideoTitle } from '../utils/videoHelper';
 import VideoStatusBadge from '../components/Video/VideoStatusBadge';
 import VideoPlayer from '../components/Video/VideoPlayer';
+import LikeButton from '../components/Video/LikeButton';
+import FavoriteButton from '../components/Video/FavoriteButton';
+import RatingStars from '../components/Video/RatingStars';
+import CommentSection from '../components/Video/CommentSection';
+import RelatedVideos from '../components/Video/RelatedVideos';
 import Button from '../components/UI/Button';
 import Modal from '../components/UI/Modal';
 import Spinner from '../components/UI/Spinner';
@@ -23,6 +28,8 @@ export default function VideoDetail() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [initialPosition, setInitialPosition] = useState(0);
+  const viewRecordedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,8 +45,22 @@ export default function VideoDetail() {
       }
     }
     load();
+
+    videoAPI.getProgress(id).then(res => {
+      if (!cancelled && res.data.success && res.data.data) {
+        setInitialPosition(res.data.data.positionSeconds || 0);
+      }
+    }).catch(() => {});
+
     return () => { cancelled = true; };
   }, [id]);
+
+  useEffect(() => {
+    if (video?.status === 'READY' && !viewRecordedRef.current) {
+      viewRecordedRef.current = true;
+      videoAPI.recordView(id).catch(() => {});
+    }
+  }, [video?.status, id]);
 
   useEffect(() => {
     if (!video || (video.status !== 'PROCESSING' && video.status !== 'UPLOADING')) return;
@@ -109,12 +130,13 @@ export default function VideoDetail() {
   ];
 
   return (
-    <div className="max-w-[1400px] mx-auto px-5 md:px-8 py-6 lg:flex lg:gap-6 lg:items-start">
+    <div className="max-w-[1400px] mx-auto px-5 md:px-8 py-6">
+    <div className="lg:flex lg:gap-6 lg:items-start">
       {/* Player */}
       <div className="lg:flex-1 mb-6 lg:mb-0">
         <div className="w-full bg-black rounded-xl border border-white/[0.06] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           {video.status === 'READY' ? (
-            <VideoPlayer src={hlsSrc} poster={video.thumbnailUrl} />
+            <VideoPlayer src={hlsSrc} poster={video.thumbnailUrl} videoId={video.id || video.videoId} initialPosition={initialPosition} />
           ) : video.status === 'PROCESSING' ? (
             <div className="aspect-video flex flex-col items-center justify-center bg-gradient-to-br from-[#141414] to-black">
               <Spinner size="lg" className="mb-5 border-yellow-500" />
@@ -159,7 +181,21 @@ export default function VideoDetail() {
               <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{video.description}</p>
             </div>
           )}
+
+          {video.status === 'READY' && (
+            <div className="mt-4 pt-4 border-t border-white/[0.04]">
+              <RatingStars videoId={video.id || video.videoId} avgRating={video.avgRating} ratingCount={video.ratingCount} />
+            </div>
+          )}
         </div>
+
+        {/* Like / Favorite */}
+        {video.status === 'READY' && (
+          <div className="flex gap-2">
+            <LikeButton videoId={video.id || video.videoId} initialLikeCount={video.likeCount} />
+            <div className="flex-1"><FavoriteButton videoId={video.id || video.videoId} /></div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="space-y-2">
@@ -182,6 +218,19 @@ export default function VideoDetail() {
           </button>
         </div>
       </div>
+    </div>
+
+      {video.status === 'READY' && (
+        <>
+          <div className="mt-8 max-w-3xl">
+            <CommentSection videoId={video.id || video.videoId} initialCommentCount={video.commentCount} />
+          </div>
+
+          <div className="mt-10">
+            <RelatedVideos videoId={video.id || video.videoId} />
+          </div>
+        </>
+      )}
 
       <Modal isOpen={isDeleteModalOpen} onClose={() => !isDeleting && setDeleteModalOpen(false)} title="Xác nhận xóa"
         actions={<><Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={isDeleting}>Hủy</Button><Button variant="danger" onClick={handleDelete} loading={isDeleting}>Xóa</Button></>}>
