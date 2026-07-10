@@ -1,7 +1,46 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { videoAPI } from '../../services/api';
-import { cleanVideoTitle } from '../../utils/videoHelper';
+import { cleanVideoTitle, getTitleInitials } from '../../utils/videoHelper';
+
+const GRADIENT_PAIRS = [
+  ['#1e1b4b', '#312e81'],
+  ['#1c1917', '#292524'],
+  ['#0f172a', '#1e293b'],
+  ['#1a0a00', '#431407'],
+  ['#042f2e', '#134e4a'],
+  ['#1e1b4b', '#4a044e'],
+];
+
+function Thumbnail({ video }) {
+  const [imgError, setImgError] = useState(false);
+  const hasThumbnail = video.thumbnailUrl && !imgError;
+  const gIdx = (video.title?.charCodeAt(0) || 65) % GRADIENT_PAIRS.length;
+  const [c1, c2] = GRADIENT_PAIRS[gIdx];
+
+  if (!hasThumbnail) {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center relative"
+        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+      >
+        <span className="relative text-xl font-black text-white/20 tracking-wider select-none">
+          {getTitleInitials(video.title)}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={video.thumbnailUrl}
+      alt=""
+      className="w-full h-full object-cover"
+      onError={() => setImgError(true)}
+      loading="lazy"
+    />
+  );
+}
 
 export default function ContinueWatchingRow() {
   const [items, setItems] = useState([]);
@@ -31,12 +70,8 @@ export default function ContinueWatchingRow() {
               to={`/videos/${item.videoId}`}
               className="group flex-shrink-0 w-52 rounded-xl overflow-hidden bg-[#161616] border border-white/[0.06] hover:border-white/[0.12] transition-all"
             >
-              <div className="relative aspect-video bg-[#0f0f0f]">
-                {item.video.thumbnailUrl ? (
-                  <img src={item.video.thumbnailUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-2xl text-white/20">▶</div>
-                )}
+              <div className="relative aspect-video bg-[#0f0f0f] overflow-hidden">
+                <Thumbnail video={item.video} />
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
                   <div className="h-full bg-[#E50914]" style={{ width: `${progressPct}%` }} />
                 </div>
